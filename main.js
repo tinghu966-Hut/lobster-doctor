@@ -476,6 +476,55 @@ app.post('/api/fix/powershell', (req, res) => {
   });
 });
 
+
+// ============================================================
+// API: Tavily 搜索配置
+// ============================================================
+app.post('/api/config/tavily', (req, res) => {
+  const { apiKey } = req.body;
+  const configPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+  if (!fs.existsSync(configPath)) {
+    return res.json({ success: false, error: '未找到 openclaw.json 配置文件，请先安装 OpenClaw' });
+  }
+  try {
+    let config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    config.plugins = config.plugins || {};
+    config.plugins.tavily = { enabled: true, apiKey: apiKey };
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
+    res.json({ success: true, message: '✅ Tavily 搜索配置已保存！龙虾现在能上网了' });
+  } catch(e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// ============================================================
+// API: 测试 Tavily 连接
+// ============================================================
+app.post('/api/test/tavily', async (req, res) => {
+  const { apiKey } = req.body;
+  const result = await httpsPostJson('api.tavily.com', '/', { api_key: apiKey, query: 'test', max_results: 1 });
+  res.json({ output: result.ok ? '✅ Tavily 连接成功！龙虾可以上网搜索了' : '❌ Tavily 连接失败，请检查 API Key 是否正确' });
+});
+
+// ============================================================
+// API: 测试模型连接
+// ============================================================
+app.post('/api/test/model', async (req, res) => {
+  const { provider, apiKey } = req.body;
+  if (!apiKey) return res.json({ output: '❌ 请先输入 API Key' });
+  if (provider === 'deepseek') {
+    const result = await httpsGetJson('api.deepseek.com', '/models', { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' });
+    return res.json({ output: result.ok ? '✅ DeepSeek 连接成功！API Key 有效' : '❌ DeepSeek 连接失败，请检查 API Key' });
+  } else if (provider === 'aliyun') {
+    const result = await httpsGetJson('dashscope.aliyuncs.com', '/compatible-mode/v1/models', { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' });
+    return res.json({ output: result.ok ? '✅ 阿里云连接成功！API Key 有效' : '❌ 阿里云连接失败，请检查 API Key' });
+  } else if (provider === 'openai') {
+    const result = await httpsGetJson('api.openai.com', '/v1/models', { 'Authorization': 'Bearer ' + apiKey, 'Accept': 'application/json' });
+    return res.json({ output: result.ok ? '✅ OpenAI 连接成功！API Key 有效' : '❌ OpenAI 连接失败，请检查 API Key' });
+  }
+  res.json({ output: '❌ 不支持的模型供应商' });
+});
+
 // ============================================================
 // API: 飞书配置助手
 // ============================================================
@@ -890,188 +939,6 @@ app.get('/api/update/check', (req, res) => {
 });
 
 // ============================================================
-// API: 一键部署 - 生成 Docker/Nginx 配置 (新增)
-// ============================================================
-app.post('/api/deploy/generate', (req, res) => {
-  const { type, name, port, domain } = req.body;
-  
-  if (type === 'docker') {
-    const dockerfile = `FROM node:20-alpine
-WORKDIR /app
-
-# 安装 OpenClaw
-RUN npm install -g openclaw
-
-# 复制配置文件
-COPY openclaw.json /root/.openclaw/
-COPY auth-profiles.json /root/.openclaw/
-
-# 暴露端口
-EXPOSE ${port || 18928}
-
-# 启动命令
-CMD ["npx", "openclaw", "gateway", "start"]
-`;
-    const dockerCompose = `version: '3.8'
-services:
-  openclaw:
-    build: .
-    container_name: ${name || 'openclaw-gateway'}
-    ports:
-      - "${port || 18928}:${port || 18928}"
-    volumes:
-      - ./data:/root/.openclaw
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-`;
-    const readme = `# ${name || 'OpenClaw'} Docker 部署
-
-## 使用方法
-
-1. 将 openclaw.json 和 auth-profiles.json 放在当前目录
-2. 运行:
-
-\`\`\`bash
-docker-compose up -d
-\`\`\`
-
-3. 查看日志:
-
-\`\`\`bash
-docker-compose logs -f
-\`\`\`
-`;
-    return res.json({
-      success: true,
-      type: 'docker',
-      files: {
-        'Dockerfile': dockerfile,
-        'docker-compose.yml': dockerCompose,
-        'README.md': readme,
-      }
-    });
-  }
-  
-  if (type === 'nginx') {
-    const nginxConfig = `# ${name || 'OpenClaw'} Nginx 反向代理配置
-# 请将 example.com 替换为你的实际域名
-
-server {
-    listen 80;
-    server_name ${domain || 'example.com'};
-    
-    # 重定向 HTTP → HTTPS
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name ${domain || 'example.com'};
-    
-    # SSL 证书配置 (请使用 certbot 或自行申请)
-    ssl_certificate /etc/letsencrypt/live/${domain || 'example.com'}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${domain || 'example.com'}/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
-    
-    # 安全头
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    
-    # 代理到 OpenClaw Gateway
-    location / {
-        proxy_pass http://127.0.0.1:${port || 18928};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 86400s;
-        proxy_send_timeout 86400s;
-    }
-    
-    # 限制上传大小 (根据需求调整)
-    client_max_body_size 100m;
-    
-    # Gzip
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript;
-}
-`;
-    const certbotGuide = `# Let's Encrypt SSL 证书获取 (使用 Certbot)
-
-# 1. 安装 Certbot
-sudo apt install certbot python3-certbot-nginx
-
-# 2. 获取证书
-sudo certbot --nginx -d ${domain || 'example.com'}
-
-# 3. 自动续期 (certbot 会自动添加 systemd timer)
-# 测试续期:
-sudo certbot renew --dry-run
-`;
-    return res.json({
-      success: true,
-      type: 'nginx',
-      files: {
-        'nginx.conf': nginxConfig,
-        'ssl-setup.md': certbotGuide,
-      }
-    });
-  }
-
-  if (type === 'systemd') {
-    const serviceContent = `[Unit]
-Description=${name || 'OpenClaw Gateway'} Service
-After=network.target
-
-[Service]
-Type=simple
-User=${os.userInfo().username}
-ExecStart=${path.join(os.homedir(), 'AppData', 'Roaming', 'npm', 'openclaw.cmd')} gateway start
-Restart=always
-RestartSec=10
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-`;
-    return res.json({
-      success: true,
-      type: 'systemd',
-      files: {
-        'openclaw-gateway.service': serviceContent,
-        'README.md': `# Systemd 服务配置
-
-## 安装
-
-\`\`\`bash
-sudo cp openclaw-gateway.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable openclaw-gateway
-sudo systemctl start openclaw-gateway
-\`\`\`
-
-## 管理
-
-\`\`\`bash
-sudo systemctl status openclaw-gateway
-sudo systemctl restart openclaw-gateway
-sudo journalctl -u openclaw-gateway -f
-\`\`\`
-`
-      }
-    });
-  }
-
-  res.json({ success: false, error: '不支持的部署类型: ' + type });
-});
-
-// ============================================================
 // API: 用户反馈 - 复制诊断信息 (新增)
 // ============================================================
 app.get('/api/diagnostics/copy', async (req, res) => {
@@ -1146,352 +1013,6 @@ app.get('/api/diagnostics/copy', async (req, res) => {
 });
 
 // ============================================================
-// API: 视频智能分析
-// ============================================================
-
-function findFfmpeg() {
-  const paths = ['ffmpeg', 'D:\\ffmpeg\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe'];
-  for (let i = 0; i < paths.length; i++) {
-    try { execSync('"' + paths[i] + '" -version', { stdio: 'pipe' }); return paths[i]; } catch(e) {}
-  }
-  try {
-    const r = execSync('where ffmpeg 2>nul', { encoding: 'utf8', shell: 'cmd.exe' });
-    const line = r.trim().split('\r\n')[0] || r.trim().split('\n')[0];
-    if (line) return line;
-  } catch(e) {}
-  return null;
-}
-const FFMPEG_PATH = findFfmpeg();
-const analysisTasks = new Map();
-
-function getDeepSeekKey() {
-  if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
-  try {
-    const authPath = path.join(os.homedir(), '.openclaw', 'auth-profiles.json');
-    if (fs.existsSync(authPath)) {
-      const auth = JSON.parse(fs.readFileSync(authPath, 'utf8'));
-      if (auth['deepseek:default']?.apiKey) return auth['deepseek:default'].apiKey;
-    }
-    const configPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-    if (fs.existsSync(configPath)) {
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      const key = config.auth?.profiles?.['deepseek:default']?.apiKey;
-      if (key) return key;
-    }
-  } catch(e) {}
-  return null;
-}
-
-function getVideoInfo(videoPath) {
-  const cmd = `"${FFMPEG_PATH}" -i "${videoPath}" 2>&1`;
-  let output = '';
-  try {
-    output = execSync(cmd, { encoding: 'utf8', stdio: 'pipe', shell: 'cmd.exe' });
-  } catch(e) {
-    output = e.stdout || e.stderr || e.message || '';
-  }
-  const info = { duration: 0, width: 0, height: 0, codec: '', format: '' };
-  const durM = output.match(/Duration: (\d+):(\d+):(\d+)\.(\d+)/);
-  if (durM) {
-    info.duration = parseInt(durM[1]) * 3600 + parseInt(durM[2]) * 60 + parseInt(durM[3]) + parseInt(durM[4]) / 100;
-  }
-  const resM = output.match(/(\d+)x(\d+)[,\s]/);
-  if (resM) { info.width = parseInt(resM[1]); info.height = parseInt(resM[2]); }
-  const codecM = output.match(/Video:\s*(\w+)/);
-  if (codecM) info.codec = codecM[1];
-  const fmtM = output.match(/Input #0, (\w+)/);
-  if (fmtM) info.format = fmtM[1];
-  return info;
-}
-
-function extractFrames(videoPath, tmpDir, numFrames) {
-  const frames = [];
-  const info = getVideoInfo(videoPath);
-  const duration = info.duration;
-  if (duration <= 0) throw new Error('无法获取视频时长，文件可能已损坏');
-  const count = Math.min(numFrames, Math.max(1, Math.floor(duration / 2)));
-  const interval = duration / count;
-  for (let i = 0; i < count; i++) {
-    const time = Math.min(i * interval, duration - 0.5);
-    const frameFile = path.join(tmpDir, `frame_${i}.jpg`);
-    const cmd = `"${FFMPEG_PATH}" -ss ${time} -i "${videoPath}" -vframes 1 -q:v 3 -y "${frameFile}" 2>&1`;
-    try {
-      execSync(cmd, { stdio: 'pipe', shell: 'cmd.exe' });
-      if (fs.existsSync(frameFile) && fs.statSync(frameFile).size > 0) {
-        frames.push({ time, file: frameFile });
-      }
-    } catch(e) {}
-  }
-  if (frames.length === 0) throw new Error('无法提取视频帧，请检查视频文件是否正常');
-  return frames;
-}
-
-function getAliyunKey() {
-  if (process.env.ALIYUN_API_KEY) return process.env.ALIYUN_API_KEY;
-  if (process.env.DASHSCOPE_API_KEY) return process.env.DASHSCOPE_API_KEY;
-  try {
-    const authPath = path.join(os.homedir(), '.openclaw', 'auth-profiles.json');
-    if (fs.existsSync(authPath)) {
-      const auth = JSON.parse(fs.readFileSync(authPath, 'utf8'));
-      if (auth['aliyun:default']?.apiKey) return auth['aliyun:default'].apiKey;
-    }
-    const configPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
-    if (fs.existsSync(configPath)) {
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      const key = config.auth?.profiles?.['aliyun:default']?.apiKey;
-      if (key) return key;
-    }
-  } catch(e) {}
-  return null;
-}
-
-function callAliyun(messages) {
-  return new Promise((resolve, reject) => {
-    const apiKey = getAliyunKey();
-    if (!apiKey) return reject(new Error('未配置阿里云 API Key，请先在"模型管家"中配置'));
-    const body = JSON.stringify({
-      model: 'qwen-vl-max',
-      messages,
-      max_tokens: 4096,
-      temperature: 0.7
-    });
-    const options = {
-      hostname: 'dashscope.aliyuncs.com',
-      path: '/compatible-mode/v1/chat/completions',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Length': Buffer.byteLength(body)
-      }
-    };
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.error) return reject(new Error(parsed.error.message));
-          const text = parsed.choices?.[0]?.message?.content || '';
-          resolve(text);
-        } catch(e) {
-          reject(new Error('API响应解析失败: ' + e.message));
-        }
-      });
-    });
-    req.on('error', reject);
-    req.write(body);
-    req.end();
-  });
-}
-
-function callDeepSeek(messages) {
-  return new Promise((resolve, reject) => {
-    const apiKey = getDeepSeekKey();
-    if (!apiKey) return reject(new Error('未配置 DeepSeek API Key，请先在"模型管家"中配置'));
-    const body = JSON.stringify({
-      model: 'deepseek-chat',
-      messages,
-      max_tokens: 4096,
-      temperature: 0.7
-    });
-    const options = {
-      hostname: 'api.deepseek.com',
-      path: '/chat/completions',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Length': Buffer.byteLength(body)
-      }
-    };
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.error) return reject(new Error(parsed.error.message));
-          const text = parsed.choices?.[0]?.message?.content || '';
-          resolve(text);
-        } catch(e) {
-          reject(new Error('API响应解析失败: ' + e.message));
-        }
-      });
-    });
-    req.on('error', reject);
-    req.write(body);
-    req.end();
-  });
-}
-
-async function processVideoTask(taskId) {
-  const task = analysisTasks.get(taskId);
-  if (!task) return;
-  try {
-    task.status = 'processing';
-
-    task.progress = 10;
-    task.message = '正在分析视频信息...';
-    const info = getVideoInfo(task.videoFile);
-
-    task.progress = 25;
-    task.message = '正在提取视频关键帧...';
-    const frames = extractFrames(task.videoFile, task.tmpDir, 8);
-
-    task.progress = 40;
-    task.message = '正在准备分析数据...';
-    const frameData = frames.map(f => ({
-      time: f.time,
-      data: fs.readFileSync(f.file).toString('base64')
-    }));
-
-    task.progress = 55;
-    task.message = 'AI 正在分析视频内容，请稍候...';
-
-    const content = [
-      {
-        type: 'text',
-        text: `You are a video content analyzer. Analyze this video based on its key frames.
-
-Video Info:
-- Duration: ${info.duration.toFixed(1)}s
-- Resolution: ${info.width}x${info.height}
-- Codec: ${info.codec}
-- Format: ${info.format}
-
-Key frames at timestamps: ${frames.map(f => f.time.toFixed(1) + 's').join(', ')}
-
-Please provide in Chinese (中文):
-1. **视频摘要** (2-3 sentences describing the video)
-2. **关键场景** (list each scene with timestamp and description)
-3. **内容分类** (tutorial, presentation, interview, entertainment, etc.)`
-      },
-      ...frameData.map(f => ({
-        type: 'image_url',
-        image_url: { url: `data:image/jpeg;base64,${f.data}` }
-      }))
-    ];
-
-    const model = task.model || 'aliyun';
-    const caller = model === 'aliyun' ? callAliyun : callDeepSeek;
-    const analysis = await caller([{ role: 'user', content }]);
-
-    task.progress = 90;
-    task.message = '正在整理分析结果...';
-
-    const segments = frames.map(f => {
-      const m = Math.floor(f.time / 60);
-      const s = Math.floor(f.time % 60);
-      return { timestamp: `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`, timeSeconds: f.time };
-    });
-
-    task.progress = 100;
-    task.message = '分析完成';
-    task.status = 'done';
-    task.result = {
-      videoInfo: info,
-      segments,
-      analysis
-    };
-
-    setTimeout(() => {
-      try { if (fs.existsSync(task.tmpDir)) fs.rmSync(task.tmpDir, { recursive: true, force: true }); } catch(e) {}
-    }, 120000);
-
-  } catch(e) {
-    task.status = 'error';
-    task.error = e.message;
-    task.progress = 100;
-    task.message = '分析失败';
-  }
-}
-
-app.post('/api/video/analyze', (req, res) => {
-  const { videoPath, videoData, fileName } = req.body;
-
-  if (!videoPath && !videoData) {
-    return res.json({ success: false, error: '请提供视频文件路径(videoPath)或视频数据(videoData)' });
-  }
-
-  const taskId = (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) :
-    Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
-  const tmpDir = path.join(os.tmpdir(), 'lobster-video', taskId);
-  fs.mkdirSync(tmpDir, { recursive: true });
-
-  let videoFile;
-  if (videoPath) {
-    if (!fs.existsSync(videoPath)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-      return res.json({ success: false, error: '视频文件不存在: ' + videoPath });
-    }
-    videoFile = videoPath;
-  } else {
-    const ext = fileName ? path.extname(fileName) : '.mp4';
-    videoFile = path.join(tmpDir, 'input' + ext);
-    fs.writeFileSync(videoFile, Buffer.from(videoData, 'base64'));
-  }
-
-  analysisTasks.set(taskId, {
-    status: 'queued', progress: 0, message: '排队中...',
-    tmpDir, videoFile, result: null, error: null,
-    model: req.body.model || 'aliyun'
-  });
-
-  processVideoTask(taskId);
-
-  res.json({ success: true, taskId });
-});
-
-app.get('/api/video/analyze/status/:taskId', (req, res) => {
-  const task = analysisTasks.get(req.params.taskId);
-  if (!task) return res.json({ success: false, error: '任务不存在或已过期' });
-
-  if (task.status === 'done') {
-    res.json({ success: true, status: 'done', progress: 100, message: '分析完成', result: task.result });
-  } else if (task.status === 'error') {
-    res.json({ success: false, status: 'error', progress: 100, message: task.error, error: task.error });
-  } else {
-    res.json({ success: true, status: task.status, progress: task.progress, message: task.message });
-  }
-});
-
-// ============================================================
-// API: 视觉模型分析
-// ============================================================
-app.post('/api/vision/analyze', async (req, res) => {
-  const { model, image, prompt, images } = req.body;
-  if (!image && (!images || images.length === 0)) {
-    return res.json({ success: false, error: '请提供图片数据(image 或 images)' });
-  }
-
-  const content = [
-    { type: 'text', text: prompt || '请详细描述这张图片的内容，包括物体、场景、颜色、文字等' }
-  ];
-
-  if (image) {
-    content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${image}` } });
-  }
-  if (images) {
-    images.forEach(img => {
-      content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${img}` } });
-    });
-  }
-
-  try {
-    let analysis;
-    if (model === 'deepseek') {
-      analysis = await callDeepSeek([{ role: 'user', content }]);
-    } else {
-      analysis = await callAliyun([{ role: 'user', content }]);
-    }
-    res.json({ success: true, analysis });
-  } catch(e) {
-    res.json({ success: false, error: e.message });
-  }
-});
-
-// ============================================================
 // API: Keep-Alive (心跳)
 // ============================================================
 app.get('/api/ping', (req, res) => {
@@ -1508,7 +1029,7 @@ app.listen(PORT, HOST, () => {
   服务已启动: http://${HOST}:${PORT}
   按 Ctrl+C 停止
   
-  一条龙服务 · 从安装到运维全包
+  不懂技术也能用 OpenClaw · 安装 / 推荐指引 / 急救
   `);
   
   // 尝试自动打开浏览器

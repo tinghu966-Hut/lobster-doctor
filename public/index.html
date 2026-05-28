@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦐 龙虾保姆 — OpenClaw 一条龙服务</title>
+<title>🦐 龙虾保姆 — 不懂技术也能用 OpenClaw</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -19,7 +19,7 @@
     --blue: #58a6ff;
     --gold: #d29922;
     --purple: #a371f7;
-    --radius: 8px;
+    --radius: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -31,63 +31,44 @@
 
   /* ===== Header ===== */
   .header {
-    background: var(--bg2);
+    background: linear-gradient(135deg, var(--bg2), #1a1f2e);
     border-bottom: 1px solid var(--border);
-    padding: 16px 30px;
+    padding: 18px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo { font-size: 34px; }
-  .title { font-size: 20px; font-weight: 700; color: var(--accent2); }
-  .subtitle { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 40px; }
+  .title { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, var(--accent2), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .slogan { font-size: 14px; color: var(--text2); margin-top: 2px; }
+  .slogan em { color: var(--accent2); font-style: normal; font-weight: 600; }
   .header-right { display: flex; align-items: center; gap: 12px; }
   .status-dot {
     display: inline-block; width: 10px; height: 10px;
     border-radius: 50%; margin-right: 6px;
   }
-  .status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .status-dot.online { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red); }
   .status-text { font-size: 13px; color: var(--text2); }
   .version-tag {
     background: linear-gradient(135deg, var(--accent), #e06b20);
     color: #fff; font-size: 10px; font-weight: 700;
-    padding: 2px 8px; border-radius: 10px;
+    padding: 2px 10px; border-radius: 10px;
   }
 
-  /* ===== Onboarding Banner ===== */
-  .onboarding-banner {
-    background: linear-gradient(135deg, rgba(255,123,43,0.15), rgba(163,113,247,0.15));
-    border-bottom: 1px solid var(--accent);
-    padding: 10px 30px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-size: 14px;
-  }
-  .onboarding-banner.show { display: flex; }
-  .onboarding-banner .btn-sm {
-    padding: 5px 16px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    font-size: 12px;
+  /* ===== Slogan Banner ===== */
+  .slogan-banner {
+    background: linear-gradient(135deg, rgba(255,123,43,0.08), rgba(163,113,247,0.08));
+    border-bottom: 1px solid rgba(255,123,43,0.2);
+    padding: 14px 30px;
+    text-align: center;
+    font-size: 18px;
     font-weight: 600;
   }
-  .onboarding-banner .btn-sm:hover { filter: brightness(1.1); }
-  .onboarding-banner .dismiss {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    cursor: pointer;
-    padding: 5px 12px;
-    border-radius: var(--radius);
-    font-size: 12px;
-  }
+  .slogan-banner span { color: var(--accent2); }
 
   /* ===== Tabs ===== */
   .tabs {
@@ -99,113 +80,80 @@
     gap: 2px;
   }
   .tab {
-    padding: 12px 16px;
+    padding: 14px 20px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text2);
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     white-space: nowrap;
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    font-weight: 500;
   }
   .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
   .tab.active {
     color: var(--accent2);
     border-bottom-color: var(--accent2);
-    font-weight: 600;
+    font-weight: 700;
   }
-  .tab .badge {
-    background: var(--accent);
-    color: #fff;
-    font-size: 9px;
-    padding: 1px 5px;
-    border-radius: 8px;
-    font-weight: 600;
-  }
-  .tab .badge-green {
-    background: var(--green);
-    color: #fff;
-    font-size: 9px;
-    padding: 1px 5px;
-    border-radius: 8px;
-    font-weight: 600;
-  }
+  .tab .rec { font-size: 10px; color: var(--gold); margin-left: 2px; }
 
   /* ===== Panels ===== */
-  .panel { display: none; padding: 24px 30px; max-width: 1060px; margin: 0 auto; }
+  .panel { display: none; padding: 28px 30px; max-width: 960px; margin: 0 auto; }
   .panel.active { display: block; }
-  .panel-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .panel-desc { color: var(--text2); margin-bottom: 20px; font-size: 13px; line-height: 1.7; }
+  .panel-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .panel-desc { color: var(--text2); margin-bottom: 24px; font-size: 14px; line-height: 1.8; }
 
-  /* ===== Cards ===== */
+  /* ===== Big Module Cards (Dashboard) ===== */
+  .module-grid { display: grid; gap: 16px; }
+  .module-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .module-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,123,43,0.1); }
+  .module-card .mc-icon { font-size: 40px; flex-shrink: 0; }
+  .module-card .mc-body { flex: 1; }
+  .module-card .mc-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .module-card .mc-title .stars { color: var(--gold); font-size: 14px; }
+  .module-card .mc-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .module-card .mc-action { flex-shrink: 0; }
+  .module-card .mc-status {
+    font-size: 11px; padding: 3px 10px; border-radius: 10px;
+    margin-top: 6px; display: inline-block;
+  }
+  .mc-status.ok { background: rgba(63,185,80,0.15); color: var(--green); }
+  .mc-status.no { background: rgba(248,81,73,0.12); color: var(--red); }
+  .mc-status.warn { background: rgba(210,153,34,0.15); color: var(--gold); }
+
+  /* ===== Card ===== */
   .card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
   }
-  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-
-  /* ===== Dashboard ===== */
-  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .dash-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px;
-  }
-  .dash-card h3 { font-size: 13px; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .dash-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid rgba(48,54,61,0.5); }
-  .dash-row:last-child { border-bottom: none; }
-  .dash-row .label { color: var(--text2); }
-  .dash-row .value { font-weight: 500; }
-  .dash-row .value.ok { color: var(--green); }
-  .dash-row .value.fail { color: var(--red); }
-  .dash-row .value.warn { color: var(--gold); }
-
-  .status-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .status-item {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    text-align: center;
-  }
-  .status-item .icon { font-size: 26px; margin-bottom: 5px; }
-  .status-item .name { font-size: 11px; color: var(--text2); }
-  .status-item .value { font-size: 20px; font-weight: 700; margin-top: 3px; }
-  .status-item .value.ok { color: var(--green); }
-  .status-item .value.fail { color: var(--red); }
-  .status-item .value.warn { color: var(--gold); }
-
-  /* ===== Health Score ===== */
-  .health-ring {
-    width: 100px; height: 100px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 10px;
-    font-size: 28px; font-weight: 700;
-  }
-  .health-ring.healthy { background: conic-gradient(var(--green) var(--pct), var(--bg3) var(--pct)); color: var(--green); }
-  .health-ring.fair { background: conic-gradient(var(--gold) var(--pct), var(--bg3) var(--pct)); color: var(--gold); }
-  .health-ring.poor { background: conic-gradient(var(--red) var(--pct), var(--bg3) var(--pct)); color: var(--red); }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.7; }
 
   /* ===== Buttons ===== */
   .btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 9px 20px;
+    padding: 10px 22px;
     border: none;
     border-radius: var(--radius);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -219,108 +167,134 @@
   .btn-purple { background: linear-gradient(135deg, var(--purple), #7c3aed); color: #fff; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
-  .btn-lg { padding: 12px 30px; font-size: 16px; }
+  .btn-lg { padding: 14px 36px; font-size: 18px; }
+  .btn-xl { padding: 18px 44px; font-size: 20px; font-weight: 700; }
   .btn-block { width: 100%; justify-content: center; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
-
-  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
 
   /* ===== Form ===== */
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
   .form-group input, .form-group select, .form-group textarea {
     width: 100%;
-    padding: 9px 12px;
+    padding: 10px 14px;
     background: var(--bg3);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 13px;
+    font-size: 14px;
     font-family: inherit;
     outline: none;
     transition: border 0.2s;
   }
-  .form-group textarea { min-height: 80px; resize: vertical; font-family: monospace; font-size: 12px; }
+  .form-group textarea { min-height: 80px; resize: vertical; font-family: monospace; font-size: 13px; }
   .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form-hint { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-hint { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.5; }
 
-  /* ===== Output / Log ===== */
+  /* ===== Why Box ===== */
+  .why-box {
+    background: rgba(163,113,247,0.08);
+    border: 1px solid rgba(163,113,247,0.2);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text2);
+  }
+  .why-box strong { color: var(--text); }
+
+  /* ===== Step ===== */
+  .step-list { counter-reset: step; margin: 14px 0; }
+  .step-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 12px 16px; background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 8px; font-size: 13px;
+  }
+  .step-item .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-item .step-body { flex: 1; }
+  .step-item .step-title { font-weight: 600; margin-bottom: 2px; }
+
+  /* ===== Output ===== */
   .output {
     background: #000;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 12px;
+    padding: 14px;
     font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.6;
-    max-height: 250px;
+    max-height: 260px;
     overflow-y: auto;
     white-space: pre-wrap;
     color: #7ee787;
     display: none;
-    margin-top: 10px;
+    margin-top: 12px;
   }
   .output.show { display: block; }
 
   /* ===== Loading ===== */
   .spinner {
     display: inline-block;
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     border: 2px solid var(--text2);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ===== Skill Grid ===== */
-  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
-  .skill-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    cursor: pointer;
-    transition: border 0.2s;
+  .progress-bar {
+    height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 12px 0; display: none;
   }
-  .skill-card:hover { border-color: var(--accent); }
-  .skill-card .name { font-weight: 600; font-size: 13px; }
-  .skill-card .desc { font-size: 11px; color: var(--text2); margin-top: 5px; line-height: 1.5; }
-  .skill-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
-  .skill-card .tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
-  .skill-card .tag.installed { background: rgba(63,185,80,0.15); color: var(--green); }
-  .skill-card .tag.available { background: rgba(88,166,255,0.15); color: var(--blue); }
-
-  /* ===== Backup List ===== */
-  .backup-list { margin-top: 10px; }
-  .backup-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 12px; background: var(--bg3); border-radius: var(--radius);
-    margin-bottom: 5px; font-size: 12px;
+  .progress-bar.show { display: block; }
+  .progress-bar .fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 3px; transition: width 0.5s;
   }
-  .backup-item .time { color: var(--text2); font-size: 11px; }
 
-  /* ===== Emergency ===== */
-  .emergency-hero {
-    text-align: center; padding: 30px 20px;
-    background: linear-gradient(135deg, rgba(248,81,73,0.1), rgba(255,123,43,0.1));
-    border: 1px solid rgba(248,81,73,0.3);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 20px;
+    font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    display: none; z-index: 1000;
+    max-width: 400px;
   }
-  .emergency-hero h2 { font-size: 28px; margin-bottom: 8px; }
-  .emergency-hero p { color: var(--text2); margin-bottom: 16px; font-size: 13px; }
+  .toast.show { display: flex; align-items: center; gap: 8px; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast .close-toast {
+    margin-left: auto; cursor: pointer; color: var(--text2);
+    background: none; border: none; font-size: 18px;
+  }
 
-  /* ===== Diagnostics ===== */
+  /* ===== Health Ring ===== */
+  .health-ring {
+    width: 90px; height: 90px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 26px; font-weight: 700;
+  }
+  .health-ring.healthy { background: conic-gradient(var(--green) var(--pct), var(--bg3) var(--pct)); color: var(--green); }
+  .health-ring.fair { background: conic-gradient(var(--gold) var(--pct), var(--bg3) var(--pct)); color: var(--gold); }
+  .health-ring.poor { background: conic-gradient(var(--red) var(--pct), var(--bg3) var(--pct)); color: var(--red); }
+
+  /* ===== Issue ===== */
   .issue-item {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 10px 14px; background: var(--bg3); border-radius: var(--radius);
     margin-bottom: 6px; border-left: 3px solid var(--border);
   }
   .issue-item.critical { border-left-color: var(--red); }
-  .issue-item.error { border-left-color: #f85149; }
+  .issue-item.error { border-left-color: var(--red); }
   .issue-item.warning { border-left-color: var(--gold); }
   .issue-item.info { border-left-color: var(--blue); }
   .issue-item .sev {
@@ -333,86 +307,35 @@
   .issue-item .sev.info { background: rgba(88,166,255,0.15); color: var(--blue); }
   .issue-item .issue-body { flex: 1; }
   .issue-item .issue-title { font-size: 13px; font-weight: 600; }
-  .issue-item .issue-desc { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .issue-item .issue-desc { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
   .issue-item .issue-fix { margin-top: 6px; }
 
-  /* ===== Progress ===== */
-  .progress-bar {
-    height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 10px 0; display: none;
+  /* ===== Search Config ===== */
+  .provider-tag {
+    display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 10px; font-weight: 600;
   }
-  .progress-bar.show { display: block; }
-  .progress-bar .fill {
-    height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--green));
-    border-radius: 2px; transition: width 0.5s;
-  }
+  .provider-tag.top { background: rgba(210,153,34,0.2); color: var(--gold); }
+  .provider-tag.rec { background: rgba(163,113,247,0.15); color: var(--purple); }
 
-  /* ===== Toast ===== */
-  .toast {
-    position: fixed; bottom: 20px; right: 20px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 12px 18px;
-    font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    display: none; z-index: 1000;
-    max-width: 380px;
+  /* ===== Backup Items ===== */
+  .backup-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px; background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 5px; font-size: 13px;
   }
-  .toast.show { display: flex; align-items: center; gap: 8px; animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .toast .close-toast {
-    margin-left: auto; cursor: pointer; color: var(--text2);
-    background: none; border: none; font-size: 16px;
-  }
-
-  /* ===== Deploy tab ===== */
-  .deploy-files { margin-top: 10px; }
-  .deploy-file {
-    background: var(--bg3); border-radius: var(--radius);
-    margin-bottom: 8px; overflow: hidden;
-  }
-  .deploy-file .file-header {
-    padding: 8px 12px; font-size: 12px; font-weight: 600;
-    background: rgba(255,255,255,0.03); display: flex;
-    justify-content: space-between; align-items: center;
-    cursor: pointer;
-  }
-  .deploy-file .file-body {
-    padding: 12px; font-family: monospace; font-size: 11px;
-    white-space: pre-wrap; color: #7ee787; display: none;
-    max-height: 300px; overflow-y: auto;
-  }
-  .deploy-file .file-body.show { display: block; }
-
-  /* ===== Update ===== */
-  .update-card {
-    display: flex; align-items: center; gap: 14px;
-    padding: 12px; background: rgba(57,185,80,0.08);
-    border: 1px solid rgba(57,185,80,0.2);
-    border-radius: var(--radius); margin-bottom: 10px;
-  }
-  .update-card .update-icon { font-size: 28px; }
-  .update-card .update-text { flex: 1; }
-  .update-card .update-text h4 { font-size: 14px; }
-  .update-card .update-text p { font-size: 12px; color: var(--text2); }
-
-  /* ===== Feedback Toast ===== */
-  .copy-success { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: var(--bg2); border: 1px solid var(--green);
-    padding: 20px 40px; border-radius: var(--radius);
-    font-size: 18px; text-align: center; z-index: 2000;
-    display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-  .copy-success.show { display: block; animation: fadeIn 0.2s ease; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .backup-item .time { color: var(--text2); font-size: 12px; }
 
   /* ===== Responsive ===== */
   @media (max-width: 768px) {
-    .header { padding: 12px 15px; flex-wrap: wrap; gap: 8px; }
+    .header { padding: 12px 15px; }
     .tabs { padding: 0 8px; }
-    .tab { padding: 10px 12px; font-size: 12px; }
-    .panel { padding: 16px 12px; }
+    .tab { padding: 12px 14px; font-size: 13px; }
+    .panel { padding: 18px 14px; }
+    .module-card { flex-direction: column; text-align: center; padding: 18px; }
+    .mc-action { width: 100%; }
+    .mc-action .btn { width: 100%; }
     .form-row { grid-template-columns: 1fr; }
-    .status-grid { grid-template-columns: repeat(3, 1fr); }
-    .skill-grid { grid-template-columns: 1fr; }
-    .dash-grid { grid-template-columns: 1fr; }
-    .onboarding-banner { flex-wrap: wrap; text-align: center; padding: 10px 15px; }
+    .slogan-banner { font-size: 15px; padding: 10px 15px; }
   }
 </style>
 </head>
@@ -424,7 +347,7 @@
     <div class="logo">🦐</div>
     <div>
       <div class="title">龙虾保姆 <span class="version-tag">v2.0</span></div>
-      <div class="subtitle">OpenClaw 一条龙服务 · 安装 / 配置 / 运维 / 急救</div>
+      <div class="slogan">不懂技术也能用 <em>OpenClaw</em></div>
     </div>
   </div>
   <div class="header-right">
@@ -432,287 +355,137 @@
       <span class="status-dot online" id="statusDot"></span>
       <span class="status-text" id="statusText">检测中...</span>
     </div>
-    <button class="btn btn-outline" onclick="refreshStatus()" style="padding:5px 10px;font-size:11px">🔄</button>
-    <button class="btn btn-outline" onclick="copyDiagnostics()" style="padding:5px 10px;font-size:11px" title="复制诊断信息">📋</button>
+    <button class="btn btn-outline" onclick="refreshAll()" style="padding:5px 12px;font-size:12px">🔄</button>
   </div>
 </div>
 
-<!-- ===== Onboarding Banner ===== -->
-<div class="onboarding-banner" id="onboardingBanner">
-  <span>🎉 欢迎使用龙虾保姆！看起来你还没有完成初始设置</span>
-  <button class="btn-sm" onclick="window.open('onboarding.html','_blank')">🚀 开始引导</button>
-  <button class="dismiss" onclick="dismissOnboarding()">稍后再说</button>
+<div class="slogan-banner">
+  🦐 安装 <span>·</span> 推荐指引 <span>·</span> 急救 — 龙虾保姆就是你的 OpenClaw 人生导师
 </div>
 
 <!-- ===== Tabs ===== -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab(this, 'home')">
-    <span>🏠</span> 仪表盘
+    🏠 首页
   </div>
   <div class="tab" onclick="switchTab(this, 'install')">
-    <span>🚀</span> 智能安装
-  </div>
-  <div class="tab" onclick="switchTab(this, 'feishu')">
-    <span>💬</span> 飞书助手
+    🚀 智能安装 <span class="rec">⭐⭐⭐</span>
   </div>
   <div class="tab" onclick="switchTab(this, 'model')">
-    <span>🤖</span> 模型管家
+    🤖 模型配置 <span class="rec">⭐⭐⭐</span>
   </div>
-  <div class="tab" onclick="switchTab(this, 'skills')">
-    <span>🧩</span> 技能商店
+  <div class="tab" onclick="switchTab(this, 'search')">
+    🔍 搜索工具 <span class="rec">⭐⭐⭐</span>
   </div>
-  <div class="tab" onclick="switchTab(this, 'diagnostics')">
-    <span>🔍</span> 智能诊断 <span class="badge" id="diagBadge">NEW</span>
-  </div>
-  <div class="tab" onclick="switchTab(this, 'deploy')">
-    <span>📦</span> 一键部署 <span class="badge">NEW</span>
-  </div>
-  <div class="tab" onclick="switchTab(this, 'video')">
-    <span>🎥</span> 视频分析
+  <div class="tab" onclick="switchTab(this, 'feishu')">
+    💬 飞书配置 <span class="rec">⭐⭐</span>
   </div>
   <div class="tab" onclick="switchTab(this, 'emergency')">
-    <span>🚑</span> 急诊中心
-  </div>
-  <div class="tab" onclick="switchTab(this, 'backup')">
-    <span>📦</span> 备份医生
-  </div>
-  <div class="tab" onclick="switchTab(this, 'updates')">
-    <span>🔄</span> 更新 <span class="badge-green" id="updateBadge" style="display:none">1</span>
+    🚑 急救中心 <span class="rec">⭐⭐⭐</span>
   </div>
 </div>
 
 <!-- ============================================================ -->
-<!-- PANEL: 仪表盘 -->
+<!-- PANEL: 首页仪表盘（大卡片风格） -->
 <!-- ============================================================ -->
 <div class="panel active" id="panel-home">
-  <div class="panel-title">🏠 实时仪表盘</div>
-  <div class="panel-desc">Gateway / 飞书 / 模型 / 系统资源 一目了然。</div>
+  <div class="panel-title">🏠 首页</div>
+  <div class="panel-desc">从安装到急救，5步上手 OpenClaw。挑一个开始吧 👇</div>
 
-  <div class="dash-grid">
-    <div class="dash-card">
-      <h3>🦐 服务状态</h3>
-      <div id="dashServices"></div>
-    </div>
-    <div class="dash-card">
-      <h3>💻 系统资源</h3>
-      <div id="dashSystem"></div>
-    </div>
-  </div>
-
-  <div class="status-grid" id="shortStatus">
-    <div class="status-item"><div class="icon">🟢</div><div class="name">Node.js</div><div class="value" id="s-node">...</div></div>
-    <div class="status-item"><div class="icon">🦐</div><div class="name">OpenClaw</div><div class="value" id="s-openclaw">...</div></div>
-    <div class="status-item"><div class="icon">🎬</div><div class="name">FFmpeg</div><div class="value" id="s-ffmpeg">...</div></div>
-    <div class="status-item"><div class="icon">🔧</div><div class="name">Git</div><div class="value" id="s-git">...</div></div>
-    <div class="status-item"><div class="icon">📂</div><div class="name">工作区</div><div class="value" id="s-workspace">...</div></div>
-    <div class="status-item"><div class="icon">🔌</div><div class="name">Gateway</div><div class="value" id="s-gateway">...</div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📋 快速操作</div>
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="switchTab(undefined, 'install')">🚀 安装 / 更新</button>
-      <button class="btn btn-success" onclick="switchTab(undefined, 'feishu')">💬 配置飞书</button>
-      <button class="btn btn-purple" onclick="switchTab(undefined, 'diagnostics')">🔍 智能诊断</button>
-      <button class="btn btn-danger" onclick="switchTab(undefined, 'emergency')">🚑 一键急救</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📖 关于龙虾保姆</div>
-    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
-      龙虾保姆是龙虾医生的升级版——从「急诊工具」进化为「一条龙服务」。<br>
-      从安装引导到日常运维，从智能诊断到一键部署，全包。<br><br>
-      <b>十大模块：</b>开机引导 · 仪表盘 · 智能安装 · 飞书助手 · 模型管家 · 技能商店 · 智能诊断 · 一键部署 · 急诊中心 · 备份医生
-    </p>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 智能安装 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-install">
-  <div class="panel-title">🚀 智能安装</div>
-  <div class="panel-desc">自动检测环境、安装 OpenClaw、修复常见问题。</div>
-
-  <div class="card">
-    <div class="card-title">🔍 环境检测</div>
-    <button class="btn btn-outline" onclick="refreshStatus()">🔄 重新检测</button>
-    <div id="installEnv" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🛠️ 安装 / 修复</div>
-    <div class="btn-group">
-      <button class="btn btn-primary btn-lg" onclick="installOpenclaw()">📦 安装 / 更新 OpenClaw</button>
-      <button class="btn btn-outline" onclick="fixPowershell()">🔧 修复 PowerShell</button>
-    </div>
-    <div class="progress-bar" id="installProgress"><div class="fill" style="width:0%"></div></div>
-    <div class="output" id="installOutput"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">💡 安装说明</div>
-    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
-      1. 本工具会自动检测你的系统环境<br>
-      2. 如果 Node.js 未安装，请先<a href="https://nodejs.org" target="_blank" style="color:var(--blue)">去官网下载 Node.js</a><br>
-      3. 点击上方按钮自动安装 OpenClaw<br>
-      4. 安装完成后配置飞书和模型即可使用<br>
-      5. 首次使用建议运行<b>开机引导向导</b>完成全部配置
-    </p>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 飞书助手 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-feishu">
-  <div class="panel-title">💬 飞书助手</div>
-  <div class="panel-desc">可视化配置飞书机器人连接，无需手动编辑 JSON 文件。</div>
-
-  <div class="card">
-    <div class="card-title">📝 飞书配置</div>
-    <div class="form-group">
-      <label>App ID</label>
-      <input type="text" id="feishuAppId" placeholder="cli_xxxxxxxxxxxxxxxxx">
-      <div class="form-hint">在 飞书开放平台 → 应用 → 凭证与基础信息 中获取</div>
-    </div>
-    <div class="form-group">
-      <label>App Secret</label>
-      <input type="password" id="feishuSecret" placeholder="输入 App Secret">
-      <div class="form-hint">同一页面下方的 App Secret</div>
-    </div>
-    <div class="btn-group">
-      <button class="btn btn-success" onclick="testFeishu()">🔌 测试连接</button>
-      <button class="btn btn-primary" onclick="saveFeishu()">💾 保存配置</button>
-    </div>
-    <div class="output" id="feishuOutput"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📖 获取方法</div>
-    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
-      1. 打开 <a href="https://open.feishu.cn" target="_blank" style="color:var(--blue)">飞书开放平台</a><br>
-      2. 创建企业自建应用 → 填写应用名称<br>
-      3. 在"凭证与基础信息"中获取 App ID 和 App Secret<br>
-      4. 在"权限管理"中添加需要的权限<br>
-      5. 发布应用 → 等待审核通过
-    </p>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 模型管家 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-model">
-  <div class="panel-title">🤖 模型管家</div>
-  <div class="panel-desc">一键配置 AI 模型 API Key，支持 DeepSeek、阿里云、OpenAI。</div>
-
-  <div class="card">
-    <div class="card-title">🔑 API Key 配置</div>
-    <div class="form-group">
-      <label>选择模型供应商</label>
-      <select id="modelProvider">
-        <option value="deepseek">DeepSeek（国内可用，推荐）</option>
-        <option value="aliyun">阿里云通义千问（国内可用）</option>
-        <option value="openai">OpenAI（需海外支付方式）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>API Key</label>
-      <input type="password" id="modelApiKey" placeholder="sk-...">
-    </div>
-    <div class="form-group" id="modelBaseUrlGroup">
-      <label>API 地址（可选，一般不用改）</label>
-      <input type="text" id="modelBaseUrl" placeholder="留空使用默认地址">
-    </div>
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="saveModel()">💾 保存配置</button>
-    </div>
-    <div class="output" id="modelOutput"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">💡 推荐</div>
-    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
-      <b>DeepSeek</b> — 国内直接访问，性价比高，适合新手<br>
-      <b>阿里云通义千问</b> — 国内直接访问，有免费额度<br>
-      <b>OpenAI</b> — 需要海外信用卡，访问需要代理
-    </p>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 技能商店 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-skills">
-  <div class="panel-title">🧩 技能商店</div>
-  <div class="panel-desc">搜索和安装 OpenClaw 技能（Skills），一键扩展能力。</div>
-
-  <div class="card">
-    <div class="card-title">🔍 搜索技能</div>
-    <div class="form-group">
-      <input type="text" id="skillSearch" placeholder="搜索技能名称，如 self-improving、github、deploy" onkeydown="if(event.key==='Enter') searchSkills()">
-    </div>
-    <button class="btn btn-outline" onclick="searchSkills()">🔍 搜索</button>
-    <div class="output" id="skillSearchOutput"></div>
-    
-    <div class="skill-grid" id="skillResults" style="margin-top:12px"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📦 推荐技能</div>
-    <div class="skill-grid">
-      <div class="skill-card">
-        <div class="name">🦐 自改进</div>
-        <div class="desc">自动记录错误和学习，持续优化表现</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('self-improving-agent')">安装</button></div>
+  <div class="module-grid">
+    <!-- 1. 智能安装 -->
+    <div class="module-card" onclick="switchTab(null, 'install')">
+      <div class="mc-icon">🚀</div>
+      <div class="mc-body">
+        <div class="mc-title">
+          智能安装 <span class="stars">⭐⭐⭐</span>
+          <span id="ms-install" class="mc-status no">未检测</span>
+        </div>
+        <div class="mc-desc">环境检测 + 一键安装 OpenClaw + 修复常见问题。不懂技术也能装。</div>
       </div>
-      <div class="skill-card">
-        <div class="name">🐙 GitHub</div>
-        <div class="desc">GitHub 全套操作：Issue、PR、CI 日志</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('github')">安装</button></div>
+      <div class="mc-action">
+        <button class="btn btn-primary btn-lg" onclick="event.stopPropagation();switchTab(null, 'install')">去安装 →</button>
       </div>
-      <div class="skill-card">
-        <div class="name">🚀 部署助手</div>
-        <div class="desc">一键生成 Docker、Nginx、CI/CD 配置</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('deploy-helper')">安装</button></div>
+    </div>
+
+    <!-- 2. 模型配置 -->
+    <div class="module-card" onclick="switchTab(null, 'model')">
+      <div class="mc-icon">🤖</div>
+      <div class="mc-body">
+        <div class="mc-title">
+          模型配置 <span class="stars">⭐⭐⭐</span>
+          <span id="ms-model" class="mc-status no">未配置</span>
+        </div>
+        <div class="mc-desc">推荐 DeepSeek — 国内可用、性价比高。填个 Key 就能用 AI。</div>
       </div>
-      <div class="skill-card">
-        <div class="name">🔍 Tavily 搜索</div>
-        <div class="desc">联网搜索能力，实时获取信息</div>
-        <div class="footer"><span class="tag available">必备</span><button class="btn btn-outline btn-sm" onclick="installSkill('tavily')">安装</button></div>
+      <div class="mc-action">
+        <button class="btn btn-purple btn-lg" onclick="event.stopPropagation();switchTab(null, 'model')">配置模型 →</button>
       </div>
-      <div class="skill-card">
-        <div class="name">🧪 任务流</div>
-        <div class="desc">多步骤复杂任务编排，自动执行</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('taskflow')">安装</button></div>
+    </div>
+
+    <!-- 3. 搜索工具 -->
+    <div class="module-card" onclick="switchTab(null, 'search')">
+      <div class="mc-icon">🔍</div>
+      <div class="mc-body">
+        <div class="mc-title">
+          搜索工具 <span class="stars">⭐⭐⭐</span>
+          <span id="ms-search" class="mc-status no">未配置</span>
+        </div>
+        <div class="mc-desc">让龙虾能上网查资料！配置 Tavily 搜索，实时获取最新信息。</div>
       </div>
-      <div class="skill-card">
-        <div class="name">🧩 技能工坊</div>
-        <div class="desc">自己动手创建和编辑技能</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('skill-creator')">安装</button></div>
+      <div class="mc-action">
+        <button class="btn btn-primary btn-lg" onclick="event.stopPropagation();switchTab(null, 'search')">配置搜索 →</button>
+      </div>
+    </div>
+
+    <!-- 4. 飞书配置 -->
+    <div class="module-card" onclick="switchTab(null, 'feishu')">
+      <div class="mc-icon">💬</div>
+      <div class="mc-body">
+        <div class="mc-title">
+          飞书配置 <span class="stars">⭐⭐</span>
+          <span id="ms-feishu" class="mc-status no">未配置</span>
+        </div>
+        <div class="mc-desc">配置飞书机器人，随时在手机上跟龙虾聊天。免费、好用、国内直连。</div>
+      </div>
+      <div class="mc-action">
+        <button class="btn btn-success btn-lg" onclick="event.stopPropagation();switchTab(null, 'feishu')">配置飞书 →</button>
+      </div>
+    </div>
+
+    <!-- 5. 急救中心 -->
+    <div class="module-card" onclick="switchTab(null, 'emergency')">
+      <div class="mc-icon">🚑</div>
+      <div class="mc-body">
+        <div class="mc-title">
+          急救中心 <span class="stars">⭐⭐⭐</span>
+          <span id="ms-emergency" class="mc-status ok">随时待命</span>
+        </div>
+        <div class="mc-desc">龙虾出问题？一键抢救、恢复身份、重启 Gateway。还能手动备份。</div>
+      </div>
+      <div class="mc-action">
+        <button class="btn btn-danger btn-lg" onclick="event.stopPropagation();switchTab(null, 'emergency')">去急救 →</button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ============================================================ -->
-<!-- PANEL: 智能诊断 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-diagnostics">
-  <div class="panel-title">🔍 智能诊断</div>
-  <div class="panel-desc">一键扫描所有可能的问题，给出修复建议。让你的系统始终健康。</div>
-
-  <div class="card" style="text-align:center">
-    <div class="health-ring" id="healthRing">
-      <span id="healthScore">--</span>
-    </div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:4px" id="healthLabel">扫描中...</div>
-    <div style="font-size:12px;color:var(--text2)" id="healthSummary"></div>
-    <div class="btn-group" style="justify-content:center;margin-top:12px">
-      <button class="btn btn-primary btn-lg" onclick="runDiagnostics()">🔍 立即扫描</button>
-      <button class="btn btn-outline" onclick="copyDiagnostics()">📋 复制诊断信息</button>
+  <!-- 快速诊断 -->
+  <div class="card" style="margin-top:8px">
+    <div class="card-title">🔍 健康检查</div>
+    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div class="health-ring" id="homeHealthRing" style="width:70px;height:70px;font-size:20px">
+          <span id="homeHealthScore">--</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2)" id="homeHealthLabel">未检查</div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:8px">当前环境状态：</div>
+        <div id="homeQuickStatus" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:12px"></div>
+      </div>
+      <div>
+        <button class="btn btn-outline" onclick="runDiagnostics()">🔍 全面检查</button>
+      </div>
     </div>
   </div>
 
@@ -722,200 +495,298 @@
       <div id="issuesList"></div>
     </div>
   </div>
-
   <div class="output" id="diagnosticsOutput"></div>
 </div>
 
 <!-- ============================================================ -->
-<!-- PANEL: 一键部署 -->
+<!-- PANEL: 智能安装 -->
 <!-- ============================================================ -->
-<div class="panel" id="panel-deploy">
-  <div class="panel-title">📦 一键部署</div>
-  <div class="panel-desc">利用 deploy-helper 技能，生成 Docker / Nginx / Systemd 配置。一键部署 OpenClaw 到服务器。</div>
+<div class="panel" id="panel-install">
+  <div class="panel-title">🚀 智能安装 <span style="font-size:14px;color:var(--gold)">⭐⭐⭐ 最推荐</span></div>
+  <div class="panel-desc">自动检测你的电脑环境，一步步带你装好 OpenClaw。</div>
 
   <div class="card">
-    <div class="card-title">⚙️ 配置参数</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>部署类型</label>
-        <select id="deployType">
-          <option value="docker">Docker (推荐)</option>
-          <option value="nginx">Nginx 反向代理</option>
-          <option value="systemd">Systemd 服务</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>服务名称（可选）</label>
-        <input type="text" id="deployName" placeholder="如 my-openclaw">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>端口号（可选）</label>
-        <input type="text" id="deployPort" placeholder="如 18928">
-      </div>
-      <div class="form-group" id="domainGroup">
-        <label>域名（Nginx 必填）</label>
-        <input type="text" id="deployDomain" placeholder="如 openclaw.example.com">
-      </div>
-    </div>
-    <button class="btn btn-purple btn-lg btn-block" onclick="generateDeployConfig()">🚀 生成部署配置</button>
-    <div class="progress-bar" id="deployProgress"><div class="fill" style="width:0%"></div></div>
-    <div class="output" id="deployOutput"></div>
-  </div>
+    <div class="card-title">📋 安装前检查</div>
+    <div class="card-subtitle">看看你电脑上已经装了哪些东西，还缺什么。</div>
+    <button class="btn btn-outline" onclick="refreshStatus()">🔄 重新检测</button>
+    <div id="installEnv" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
 
-  <div class="deploy-files" id="deployFiles" style="display:none">
-    <div class="card">
-      <div class="card-title">📄 生成的文件</div>
-      <div id="deployFileList"></div>
+    <div style="margin-top:14px">
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">装 Node.js</div>
+            <div style="color:var(--text2);font-size:12px">
+              没有 Node.js？去 <a href="https://nodejs.org" target="_blank" style="color:var(--blue)">nodejs.org</a> 下载 LTS 版本，一路"下一步"安装就行。
+            </div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">安装 OpenClaw</div>
+            <div style="color:var(--text2);font-size:12px">点下面的大按钮，自动安装/更新 OpenClaw</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">搞定！配置模型和飞书</div>
+            <div style="color:var(--text2);font-size:12px">安装完去"模型配置"和"飞书配置"填 Key 就完事了</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">💡 部署提示</div>
-    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
-      <b>Docker 部署</b> — 适合服务器环境，隔离运行，随系统自启动<br>
-      <b>Nginx 反向代理</b> — 如需绑定域名，配合 SSL 证书使用<br>
-      <b>Systemd 服务</b> — Linux 系统下管理 OpenClaw 为系统服务<br><br>
-      需要先安装 <b>deploy-helper</b> 技能以获得最佳体验（在技能商店中安装）
-    </p>
+    <div class="card-title">🛠️ 一键安装</div>
+    <div class="btn-group" style="justify-content:center">
+      <button class="btn btn-primary btn-xl" onclick="installOpenclaw()">📦 安装 / 更新 OpenClaw</button>
+      <button class="btn btn-outline btn-lg" onclick="fixPowershell()">🔧 修复 PowerShell</button>
+    </div>
+    <div class="progress-bar" id="installProgress"><div class="fill" style="width:0%"></div></div>
+    <div class="output" id="installOutput"></div>
   </div>
 </div>
 
 <!-- ============================================================ -->
-<!-- PANEL: 急诊中心 -->
+<!-- PANEL: 模型配置 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-model">
+  <div class="panel-title">🤖 模型配置 <span style="font-size:14px;color:var(--gold)">⭐⭐⭐ 最推荐</span></div>
+  <div class="panel-desc">给龙虾配上 AI 大脑，它才能跟你聊天、干活。</div>
+
+  <div class="why-box">
+    <strong>💡 为什么要配模型？</strong><br>
+    OpenClaw 的核心能力来自 AI 模型。不配模型，龙虾就是个空壳。
+    我们推荐 <strong>DeepSeek</strong> — 国内直接访问、速度快、性价比超高，最适合新手。
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 选择模型并填入 Key</div>
+
+    <div class="form-group">
+      <label>选择模型供应商</label>
+      <select id="modelProvider">
+        <option value="deepseek">DeepSeek — ⭐⭐⭐ 推荐（国内可用，性价比最高）</option>
+        <option value="aliyun">阿里通义千问 Qwen — ⭐⭐ 推荐（国内可用，有免费额度）</option>
+        <option value="openai">OpenAI — 需要海外支付方式</option>
+      </select>
+    </div>
+
+    <div id="modelWhy" class="why-box" style="background:rgba(210,153,34,0.08);border-color:rgba(210,153,34,0.2)">
+      <strong>💡 DeepSeek 好在哪里？</strong><br>
+      • ✅ 国内直接访问，不用翻墙<br>
+      • ✅ 注册送 500 万 tokens，够用很久<br>
+      • ✅ 速度很快，跟用国内 App 一样流畅<br>
+      • ✅ 价格只有 GPT 的 1/10<br><br>
+      <strong>去哪拿 Key？</strong> 打开 <a href="https://platform.deepseek.com" target="_blank" style="color:var(--blue)">platform.deepseek.com</a> → 注册 → 左侧"API Keys" → 创建 Key
+    </div>
+
+    <div class="form-group">
+      <label>API Key <span style="font-size:11px;color:var(--text2)">（登录 DeepSeek/阿里云 的开发者后台获取）</span></label>
+      <input type="password" id="modelApiKey" placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxx" style="font-size:16px;padding:12px">
+    </div>
+    <div class="form-group" id="modelBaseUrlGroup">
+      <label>API 地址 <span style="font-size:11px;color:var(--text2)">（一般不用改，留空就行）</span></label>
+      <input type="text" id="modelBaseUrl" placeholder="留空使用默认地址">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-lg" onclick="testModelConnection()">🔌 测试连接</button>
+      <button class="btn btn-primary btn-lg" onclick="saveModel()">💾 保存配置</button>
+    </div>
+    <div class="output" id="modelOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🤔 哪个模型适合我？</div>
+    <div style="display:grid;gap:10px;font-size:13px">
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 16px;border-left:3px solid var(--gold)">
+        <strong>DeepSeek ⭐⭐⭐</strong>
+        <div style="color:var(--text2);margin-top:4px">国内用户首选！速度快、价格低、不用翻墙。日常聊天、写代码、查资料都够用。</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 16px;border-left:3px solid var(--purple)">
+        <strong>阿里通义千问 Qwen ⭐⭐</strong>
+        <div style="color:var(--text2);margin-top:4px">国内可用，有免费额度。适合有余力的用户备用。</div>
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:12px 16px;border-left:3px solid var(--blue)">
+        <strong>OpenAI</strong>
+        <div style="color:var(--text2);margin-top:4px">需要海外信用卡 + 代理。不推荐国内新手。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 搜索工具 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-search">
+  <div class="panel-title">🔍 搜索工具 <span style="font-size:14px;color:var(--gold)">⭐⭐⭐ 最推荐</span></div>
+  <div class="panel-desc">给龙虾装个"搜索引擎"—— 它就能上网查资料了。</div>
+
+  <div class="why-box">
+    <strong>💡 为什么要配搜索？</strong><br>
+    没有搜索的龙虾，只能靠自己的记忆回答问题。<br>
+    配了搜索，龙虾就能<strong>实时上网</strong>查最新新闻、资料、教程——就像你一边查百度一边聊天一样。
+    <br><br>
+    我们推荐 <strong>Tavily</strong> — 专为 AI 设计的搜索引擎，每月 1000 次免费搜索，完全够用。
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 配置 Tavily 搜索</div>
+    <div class="card-subtitle">三步搞定：注册 → 复制 Key → 粘贴保存</div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">注册 Tavily 账号</div>
+          <div style="color:var(--text2);font-size:12px">
+            打开 <a href="https://tavily.com" target="_blank" style="color:var(--blue)">tavily.com</a> → 点击 "Get Started" → 用邮箱注册
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">获取 API Key</div>
+          <div style="color:var(--text2);font-size:12px">
+            登录后进入 Dashboard → 复制你的 API Key（以 "tvly-" 开头）
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px">
+      <label>Tavily API Key</label>
+      <input type="password" id="tavilyApiKey" placeholder="tvly-xxxxxxxxxxxxxxxx" style="font-size:16px;padding:12px">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-lg" onclick="testTavily()">🔌 测试连接</button>
+      <button class="btn btn-primary btn-lg" onclick="saveTavily()">💾 保存配置</button>
+    </div>
+    <div class="output" id="tavilyOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 装好搜索后的效果</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      ✅ 龙虾可以上网查新闻、查教程<br>
+      ✅ 问"今天天气怎么样" — 实时告诉你<br>
+      ✅ 问"这个 Bug 怎么修" — 去网上找最新答案<br>
+      ✅ 所有搜索免费，每月 1000 次，用到吐
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 飞书配置 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-feishu">
+  <div class="panel-title">💬 飞书配置 <span style="font-size:14px;color:var(--purple)">⭐⭐ 推荐</span></div>
+  <div class="panel-desc">在手机上跟龙虾聊天！飞书是国内最好用的沟通工具，免费、稳定。</div>
+
+  <div class="why-box">
+    <strong>💡 为什么推荐飞书？</strong><br>
+    • 🇨🇳 国内直接使用，不用翻墙<br>
+    • 🆓 个人和中小企业免费<br>
+    • 📱 手机和电脑都能用，随时随地和龙虾聊天<br>
+    • 🔗 国内网络直连，速度飞快
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 配置飞书机器人</div>
+    <div class="card-subtitle">在飞书开放平台创建应用，拿到 App ID 和 App Secret 填进来。</div>
+
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">打开飞书开放平台</div>
+          <div style="color:var(--text2);font-size:12px">
+            访问 <a href="https://open.feishu.cn" target="_blank" style="color:var(--blue)">open.feishu.cn</a> → 点击"创建应用" → 选"企业自建应用"
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">获取凭证</div>
+          <div style="color:var(--text2);font-size:12px">
+            在"凭证与基础信息"页，复制 App ID 和 App Secret 填到下面
+          </div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">发布应用</div>
+          <div style="color:var(--text2);font-size:12px">
+            创建后记得"创建版本"并"申请发布"，审核通过才能用
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:14px">
+      <label>App ID</label>
+      <input type="text" id="feishuAppId" placeholder="cli_xxxxxxxxxxxxxxxxx" style="font-size:16px;padding:12px">
+    </div>
+    <div class="form-group">
+      <label>App Secret</label>
+      <input type="password" id="feishuSecret" placeholder="输入 App Secret" style="font-size:16px;padding:12px">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline btn-lg" onclick="testFeishu()">🔌 测试连接</button>
+      <button class="btn btn-primary btn-lg" onclick="saveFeishu()">💾 保存配置</button>
+    </div>
+    <div class="output" id="feishuOutput"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 急救中心 -->
 <!-- ============================================================ -->
 <div class="panel" id="panel-emergency">
-  <div class="panel-title">🚑 急诊中心</div>
-  <div class="panel-desc">当龙虾认不出你、崩溃、或对话框异常时使用。</div>
+  <div class="panel-title">🚑 急救中心 <span style="font-size:14px;color:var(--gold)">⭐⭐⭐ 最推荐</span></div>
+  <div class="panel-desc">龙虾认不出你了？说话不正常？对话框打不开？别慌，来这里一键抢救。</div>
 
-  <div class="emergency-hero">
-    <h2>🦐 → 💀 → 🦐</h2>
-    <p>一键恢复身份、记忆、重启连接</p>
-    <button class="btn btn-danger btn-lg" onclick="emergencyRestore()" id="emergencyBtn" style="font-size:20px;padding:18px 45px">
-      🚨 一键抢救
-    </button>
-    <div style="margin-top:10px;font-size:12px;color:var(--text2)">
-      自动备份 → 恢复身份文件 → 重启 Gateway
+  <!-- 一键抢救 -->
+  <div class="card" style="border:2px solid rgba(248,81,73,0.3);background:linear-gradient(135deg, rgba(248,81,73,0.05), rgba(255,123,43,0.05))">
+    <div class="card-title" style="color:var(--red);font-size:20px">🚨 一键抢救</div>
+    <div class="card-subtitle">自动备份身份文件 → 恢复文件 → 重启 Gateway，一步到位。</div>
+    <div style="display:flex;justify-content:center;margin:16px 0">
+      <button class="btn btn-danger btn-xl" onclick="emergencyRestore()" id="emergencyBtn" style="padding:20px 50px;font-size:22px">
+        🚨 一键抢救
+      </button>
+    </div>
+    <div style="text-align:center;font-size:13px;color:var(--text2)">
+      出现什么情况用这个？<br>
+      龙虾答非所问 · 对话框显示异常 · 身份文件丢失 · 不知道做了什么改坏了
     </div>
   </div>
 
   <div class="progress-bar show" id="emergencyProgress"><div class="fill" style="width:0%"></div></div>
   <div class="output" id="emergencyOutput"></div>
 
+  <!-- 手动备份 -->
   <div class="card">
-    <div class="card-title">📋 抢救记录</div>
-    <div id="backupList" style="font-size:12px;color:var(--text2)">暂无记录</div>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 备份医生 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-backup">
-  <div class="panel-title">📦 备份医生</div>
-  <div class="panel-desc">定时备份关键文件，防止数据丢失。建议每周至少备份一次。</div>
-
-  <div class="card">
-    <div class="card-title">📤 创建备份</div>
-    <button class="btn btn-primary btn-lg" onclick="createBackup()">📦 立即备份</button>
+    <div class="card-title">📦 手动备份</div>
+    <div class="card-subtitle">定期备份关键文件，好习惯让你永远不慌。</div>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg" onclick="createBackup()">📦 立即备份</button>
+    </div>
     <div class="progress-bar" id="backupProgress"><div class="fill" style="width:0%"></div></div>
     <div class="output" id="backupOutput"></div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">📚 备份历史</div>
-    <div class="backup-list" id="backupHistory">
-      <div style="color:var(--text2);font-size:12px">加载中...</div>
-    </div>
-    <button class="btn btn-outline" onclick="listBackups()" style="margin-top:8px">🔄 刷新列表</button>
-  </div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 视频分析 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-video">
-  <div class="panel-title">🎥 视频智能分析</div>
-  <div class="panel-desc">上传视频或输入文件路径，AI 自动分析视频内容、提取关键场景、生成摘要。</div>
-
-  <div class="card">
-    <div class="card-title">📤 选择视频文件</div>
-    <div id="videoDropZone" style="border:2px dashed var(--border);border-radius:var(--radius);padding:30px 20px;text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:10px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('videoFileInput').click()">
-      <div style="font-size:44px;margin-bottom:8px">🎬</div>
-      <div style="font-size:14px;font-weight:600;color:var(--text2)">拖拽视频文件到此处</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:5px">或点击选择文件</div>
-      <input type="file" id="videoFileInput" accept=".mp4,.avi,.mov,.mkv,.webm" style="display:none" onchange="handleFileSelect(event)">
-    </div>
-    <div class="form-group">
-      <label>或输入视频文件路径（支持大文件）</label>
-      <input type="text" id="videoFilePath" placeholder="D:\videos\example.mp4">
-    </div>
-    <div id="videoFileInfo" style="font-size:12px;color:var(--text2);margin-bottom:10px;display:none"></div>
-    <div class="form-row" style="margin-bottom:10px">
-      <div class="form-group">
-        <label>视觉模型</label>
-        <select id="visionModel">
-          <option value="aliyun">阿里通义千问 (Qwen)</option>
-          <option value="deepseek">DeepSeek</option>
-        </select>
+    <div style="margin-top:14px">
+      <div style="font-size:14px;font-weight:600;margin-bottom:8px">📚 备份历史</div>
+      <div id="backupHistory">
+        <div style="color:var(--text2);font-size:13px">加载中...</div>
       </div>
-    </div>
-    <button class="btn btn-primary btn-lg btn-block" onclick="startVideoAnalysis()" id="videoAnalyzeBtn">
-      🚀 开始分析
-    </button>
-  </div>
-
-  <div id="videoProgress" style="display:none">
-    <div class="card">
-      <div class="card-title">⏳ 分析进度</div>
-      <div class="progress-bar show" id="videoProgressBar"><div class="fill" style="width:0%"></div></div>
-      <div id="videoProgressMessage" style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px">初始化...</div>
-    </div>
-  </div>
-
-  <div id="videoResult" style="display:none">
-    <div class="card">
-      <div class="card-title">📋 视频信息</div>
-      <div id="videoInfo" style="font-size:12px;color:var(--text2);display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">📝 AI 分析报告</div>
-      <div id="videoAnalysis" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap"></div>
-    </div>
-    <div class="card" id="videoSegmentsCard" style="display:none">
-      <div class="card-title">🎯 关键场景</div>
-      <div id="videoSegments" style="display:grid;gap:6px"></div>
-    </div>
-    <button class="btn btn-outline" onclick="resetVideoAnalysis()">🔄 分析新视频</button>
-  </div>
-  <div id="videoError" class="output" style="display:none;color:var(--red)"></div>
-</div>
-
-<!-- ============================================================ -->
-<!-- PANEL: 更新 -->
-<!-- ============================================================ -->
-<div class="panel" id="panel-updates">
-  <div class="panel-title">🔄 更新检查</div>
-  <div class="panel-desc">检查 OpenClaw 和龙虾保姆自身是否有新版本。</div>
-
-  <div class="card">
-    <div class="card-title">🔍 版本检查</div>
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="checkUpdates()">🔄 检查更新</button>
-    </div>
-    <div class="progress-bar" id="updateProgress"><div class="fill" style="width:0%"></div></div>
-    <div class="output" id="updateOutput"></div>
-  </div>
-
-  <div id="updateResults" style="display:none">
-    <div class="card" id="openclawUpdateCard">
-      <div class="card-title">🦐 OpenClaw</div>
-      <div id="openclawUpdateInfo"></div>
-    </div>
-    <div class="card" id="selfUpdateCard">
-      <div class="card-title">🦐 龙虾保姆</div>
-      <div id="selfUpdateInfo"></div>
+      <button class="btn btn-outline btn-sm" onclick="listBackups()" style="margin-top:6px">🔄 刷新</button>
     </div>
   </div>
 </div>
@@ -926,27 +797,21 @@
   <button class="close-toast" onclick="hideToast()">×</button>
 </div>
 
-<!-- ===== Copy Success Overlay ===== -->
-<div class="copy-success" id="copySuccess">
-  <div>✅ 诊断信息已复制到剪贴板</div>
-  <div style="font-size:13px;color:var(--text2);margin-top:8px">可粘贴发送给技术支持</div>
-</div>
-
 <!-- ===== JavaScript ===== -->
 <script>
-// ===== Tab switching =====
+// ===== UTILITIES =====
 function switchTab(el, name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
   else {
-    const idx = ['home','install','feishu','model','skills','diagnostics','deploy','video','emergency','backup','updates'].indexOf(name);
+    const tabs = ['home','install','model','search','feishu','emergency'];
+    const idx = tabs.indexOf(name);
     if (idx >= 0) document.querySelectorAll('.tab')[idx]?.classList.add('active');
   }
   document.getElementById('panel-' + name).classList.add('active');
 }
 
-// ===== Toast =====
 function showToast(msg, duration) {
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
@@ -955,74 +820,64 @@ function showToast(msg, duration) {
 }
 function hideToast() { document.getElementById('toast').classList.remove('show'); }
 
-// ===== Status =====
+// ===== STATUS + DASHBOARD =====
+async function refreshAll() {
+  await refreshStatus();
+  await loadDashboard();
+}
+
 async function refreshStatus() {
   try {
     const res = await fetch('/api/status');
     const data = await res.json();
     const c = data.checks;
-    
-    const map = (id, ok) => {
-      document.getElementById(id).innerHTML = ok ? '✅ 正常' : '❌ 缺失';
-      document.getElementById(id).className = 'value ' + (ok ? 'ok' : 'fail');
-    };
-    map('s-node', c.node);
-    map('s-openclaw', c.openclaw);
-    map('s-ffmpeg', c.ffmpeg);
-    map('s-git', c.git);
-    map('s-workspace', c.workspace);
-    map('s-gateway', c.gateway);
-    
+
+    const env = document.getElementById('installEnv');
+    if (env) {
+      env.innerHTML = Object.entries(c).map(([k,v]) =>
+        `<div style="margin:3px 0">${v?'✅':'❌'} ${k}: ${v?'正常':'缺失'}</div>`
+      ).join('');
+    }
+
     const allOk = Object.values(c).every(v => v);
     document.getElementById('statusDot').className = 'status-dot ' + (allOk ? 'online' : 'offline');
     document.getElementById('statusText').textContent = allOk ? '一切正常' : '需要处理';
-    
-    const env = document.getElementById('installEnv');
-    if (env) {
-      env.innerHTML = Object.entries(c).map(([k,v]) => `${v?'✅':'❌'} ${k}: ${v?'正常':'缺失'}`).join('<br>');
-    }
+
+    // Update module status badges
+    document.getElementById('ms-install').textContent = c.openclaw ? '已安装' : '未安装';
+    document.getElementById('ms-install').className = 'mc-status ' + (c.openclaw ? 'ok' : 'no');
   } catch(e) {
     document.getElementById('statusText').textContent = '连接失败';
   }
 }
 
-// ===== Dashboard =====
 async function loadDashboard() {
   try {
     const res = await fetch('/api/dashboard');
     const data = await res.json();
-    
-    // Services
-    const svc = document.getElementById('dashServices');
-    svc.innerHTML = `
-      <div class="dash-row"><span class="label">🔌 Gateway</span><span class="value ${data.services.gatewayOnline ? 'ok' : 'fail'}">${data.services.gatewayOnline ? '在线' : '离线'}</span></div>
-      <div class="dash-row"><span class="label">💬 飞书</span><span class="value ${data.services.feishuConfigured ? 'ok' : 'warn'}">${data.services.feishuConfigured ? '已配置' : '未配置'}</span></div>
-      <div class="dash-row"><span class="label">🤖 已配置模型</span><span class="value">${data.services.configuredModels.length > 0 ? data.services.configuredModels.join(', ') : '无'}</span></div>
-      <div class="dash-row"><span class="label">🧩 已安装技能</span><span class="value">${data.services.installedSkills} 个</span></div>
-    `;
-    
-    // System
-    const sys = document.getElementById('dashSystem');
-    sys.innerHTML = `
-      <div class="dash-row"><span class="label">💻 主机</span><span class="value">${data.system.hostname}</span></div>
-      <div class="dash-row"><span class="label">🧠 CPU</span><span class="value">${data.system.cpuCores} 核</span></div>
-      <div class="dash-row"><span class="label">💾 内存</span><span class="value ${parseFloat(data.system.memUsage) > 80 ? 'fail' : 'ok'}">${data.system.memUsage} (${data.system.memFree} 空闲)</span></div>
-      <div class="dash-row"><span class="label">💿 磁盘</span><span class="value">${data.system.diskFree} / ${data.system.diskTotal}</span></div>
-      <div class="dash-row"><span class="label">⏱ 运行时间</span><span class="value">${data.system.uptime}</span></div>
-    `;
 
-    // Onboarding banner
-    if (!data.onboardingComplete) {
-      document.getElementById('onboardingBanner').classList.add('show');
-    }
+    // Model status
+    document.getElementById('ms-model').textContent =
+      data.services.configuredModels.length > 0 ? data.services.configuredModels.join('、') : '未配置';
+    document.getElementById('ms-model').className = 'mc-status ' +
+      (data.services.configuredModels.length > 0 ? 'ok' : 'no');
+
+    // Feishu status
+    document.getElementById('ms-feishu').textContent = data.services.feishuConfigured ? '已配置' : '未配置';
+    document.getElementById('ms-feishu').className = 'mc-status ' + (data.services.feishuConfigured ? 'ok' : 'no');
+
+    // Quick status on home
+    const qs = document.getElementById('homeQuickStatus');
+    qs.innerHTML = `
+      <div>🟢 Node.js: ${data.onboardingComplete ? '✅' : '?'}</div>
+      <div>🦐 OpenClaw: ${data.services.configuredModels.length > 0 ? '✅' : '❌'}</div>
+      <div>🔌 Gateway: ${data.services.gatewayOnline ? '✅ 在线' : '❌ 离线'}</div>
+      <div>💬 飞书: ${data.services.feishuConfigured ? '✅' : '❌'}</div>
+    `;
   } catch(e) {}
 }
 
-function dismissOnboarding() {
-  document.getElementById('onboardingBanner').classList.remove('show');
-}
-
-// ===== 安装 OpenClaw =====
+// ===== 智能安装 =====
 async function installOpenclaw() {
   const btn = event.target;
   const out = document.getElementById('installOutput');
@@ -1030,19 +885,17 @@ async function installOpenclaw() {
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 安装中...';
   out.classList.add('show'); out.textContent = '⏳ 正在安装 OpenClaw...';
   prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
-  
+
   const res = await fetch('/api/install/openclaw', { method: 'POST' });
   const data = await res.json();
-  
+
   prog.querySelector('.fill').style.width = '100%';
-  out.textContent = data.output;
+  out.textContent = data.output || data.error || '安装完成';
   btn.disabled = false; btn.innerHTML = '📦 安装 / 更新 OpenClaw';
   setTimeout(() => { prog.classList.remove('show'); }, 2000);
-  refreshStatus();
-  loadDashboard();
+  refreshAll();
 }
 
-// ===== 修复 PowerShell =====
 async function fixPowershell() {
   const out = document.getElementById('installOutput');
   out.classList.add('show'); out.textContent = '🔧 正在修复 PowerShell 执行策略...';
@@ -1051,48 +904,69 @@ async function fixPowershell() {
   out.textContent = data.success ? '✅ PowerShell 执行策略已修复' : '❌ 修复失败: ' + data.error;
 }
 
-// ===== 飞书 =====
-async function testFeishu() {
-  const out = document.getElementById('feishuOutput');
+// ===== 模型配置 =====
+document.getElementById('modelProvider')?.addEventListener('change', function() {
+  const val = this.value;
+  const whyBox = document.getElementById('modelWhy');
+  const urls = { deepseek: 'https://api.deepseek.com', aliyun: '', openai: 'https://api.openai.com/v1' };
+  document.getElementById('modelBaseUrl').placeholder = urls[val] || '留空使用默认地址';
+
+  if (val === 'deepseek') {
+    whyBox.innerHTML = `
+      <strong>💡 DeepSeek 好在哪里？</strong><br>
+      • ✅ 国内直接访问，不用翻墙<br>
+      • ✅ 注册送 500 万 tokens，够用很久<br>
+      • ✅ 速度很快，跟用国内 App 一样流畅<br>
+      • ✅ 价格只有 GPT 的 1/10<br><br>
+      <strong>去哪拿 Key？</strong> 打开 <a href="https://platform.deepseek.com" target="_blank" style="color:var(--blue)">platform.deepseek.com</a> → 注册 → 左侧"API Keys" → 创建 Key
+    `;
+    whyBox.style.background = 'rgba(210,153,34,0.08)';
+    whyBox.style.borderColor = 'rgba(210,153,34,0.2)';
+  } else if (val === 'aliyun') {
+    whyBox.innerHTML = `
+      <strong>💡 阿里通义千问好在哪里？</strong><br>
+      • ✅ 国内直接使用，访问阿里云就行<br>
+      • ✅ 有免费额度，零成本上手<br>
+      • ✅ 大厂服务，稳定可靠<br><br>
+      <strong>去哪拿 Key？</strong> 打开 <a href="https://bailian.console.aliyun.com" target="_blank" style="color:var(--blue)">阿里云百炼平台</a> → API-KEY 管理 → 创建 API Key
+    `;
+    whyBox.style.background = 'rgba(163,113,247,0.08)';
+    whyBox.style.borderColor = 'rgba(163,113,247,0.2)';
+  } else {
+    whyBox.innerHTML = `
+      <strong>⚠️ OpenAI 说明</strong><br>
+      • ❌ 国内无法直接访问，需要代理<br>
+      • ❌ 需要海外信用卡<br>
+      • 💰 价格较贵<br>
+      不推荐国内新手使用。建议选 DeepSeek 或阿里云。
+    `;
+    whyBox.style.background = 'rgba(248,81,73,0.08)';
+    whyBox.style.borderColor = 'rgba(248,81,73,0.2)';
+  }
+});
+
+async function testModelConnection() {
+  const provider = document.getElementById('modelProvider').value;
+  const apiKey = document.getElementById('modelApiKey').value;
+  const out = document.getElementById('modelOutput');
+  if (!apiKey) { showToast('请先输入 API Key'); return; }
   out.classList.add('show'); out.textContent = '⏳ 测试连接中...';
-  const res = await fetch('/api/test/feishu', {
+
+  const res = await fetch('/api/test/model', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ appId: document.getElementById('feishuAppId').value, appSecret: document.getElementById('feishuSecret').value })
+    body: JSON.stringify({ provider, apiKey })
   });
   const data = await res.json();
   out.textContent = data.output;
 }
-
-async function saveFeishu() {
-  const appId = document.getElementById('feishuAppId').value;
-  const secret = document.getElementById('feishuSecret').value;
-  if (!appId || !secret) { showToast('请填写 App ID 和 App Secret'); return; }
-  
-  const out = document.getElementById('feishuOutput');
-  out.classList.add('show'); out.textContent = '⏳ 保存配置...';
-  const res = await fetch('/api/config/feishu', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ appId, appSecret: secret })
-  });
-  const data = await res.json();
-  out.textContent = data.message || data.error;
-  if (data.success) { refreshStatus(); loadDashboard(); showToast('✅ 飞书配置已保存'); }
-}
-
-// ===== 模型管家 =====
-document.getElementById('modelProvider')?.addEventListener('change', function() {
-  const urls = { deepseek: 'https://api.deepseek.com', aliyun: '', openai: 'https://api.openai.com/v1' };
-  document.getElementById('modelBaseUrl').placeholder = urls[this.value] || '留空使用默认地址';
-});
 
 async function saveModel() {
   const provider = document.getElementById('modelProvider').value;
   const apiKey = document.getElementById('modelApiKey').value;
   const baseUrl = document.getElementById('modelBaseUrl').value;
   if (!apiKey) { showToast('请输入 API Key'); return; }
-  
+
   const out = document.getElementById('modelOutput');
   out.classList.add('show'); out.textContent = '⏳ 保存模型配置...';
   const res = await fetch('/api/config/model', {
@@ -1105,50 +979,135 @@ async function saveModel() {
   if (data.success) { loadDashboard(); showToast(`✅ ${provider} 配置已保存`); }
 }
 
-// ===== 技能商店 =====
-async function searchSkills() {
-  const q = document.getElementById('skillSearch').value || 'popular';
-  const res = await fetch('/api/skills/search?q=' + encodeURIComponent(q));
-  const data = await res.json();
-  
-  const grid = document.getElementById('skillResults');
-  if (!data.skills || data.skills.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text2);font-size:12px">未找到相关技能</div>';
-    return;
-  }
-  
-  grid.innerHTML = data.skills.slice(0, 12).map(s => `
-    <div class="skill-card">
-      <div class="name">🧩 ${s.name}</div>
-      <div class="desc">${s.desc || s.slug}</div>
-      <div class="footer">
-        <span class="tag available">${s.slug}</span>
-        <button class="btn btn-outline btn-sm" onclick="installSkill('${s.slug}')">安装</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function installSkill(slug) {
-  const out = document.getElementById('skillSearchOutput');
-  out.classList.add('show'); out.textContent = `⏳ 正在安装 ${slug}...`;
-  
-  const res = await fetch('/api/skills/install', {
+// ===== 搜索工具 =====
+async function testTavily() {
+  const apiKey = document.getElementById('tavilyApiKey').value;
+  const out = document.getElementById('tavilyOutput');
+  if (!apiKey) { showToast('请先输入 Tavily API Key'); return; }
+  out.classList.add('show'); out.textContent = '⏳ 测试 Tavily 连接...';
+  const res = await fetch('/api/test/tavily', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug })
+    body: JSON.stringify({ apiKey })
   });
   const data = await res.json();
-  out.textContent = data.success ? `✅ ${slug} 安装成功!\n${data.output}` : `❌ ${data.error}`;
-  if (data.success) { loadDashboard(); showToast(`✅ ${slug} 安装成功`); }
+  out.textContent = data.output;
 }
 
-// ===== 智能诊断 =====
+async function saveTavily() {
+  const apiKey = document.getElementById('tavilyApiKey').value;
+  if (!apiKey) { showToast('请输入 Tavily API Key'); return; }
+  const out = document.getElementById('tavilyOutput');
+  out.classList.add('show'); out.textContent = '⏳ 保存搜索配置...';
+  const res = await fetch('/api/config/tavily', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey })
+  });
+  const data = await res.json();
+  out.textContent = data.message || data.error;
+  if (data.success) { showToast('✅ Tavily 搜索已配置！龙虾能上网了'); }
+}
+
+// ===== 飞书配置 =====
+async function testFeishu() {
+  const out = document.getElementById('feishuOutput');
+  out.classList.add('show'); out.textContent = '⏳ 测试连接中...';
+  const res = await fetch('/api/test/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      appId: document.getElementById('feishuAppId').value,
+      appSecret: document.getElementById('feishuSecret').value
+    })
+  });
+  const data = await res.json();
+  out.textContent = data.output;
+}
+
+async function saveFeishu() {
+  const appId = document.getElementById('feishuAppId').value;
+  const secret = document.getElementById('feishuSecret').value;
+  if (!appId || !secret) { showToast('请填写 App ID 和 App Secret'); return; }
+  const out = document.getElementById('feishuOutput');
+  out.classList.add('show'); out.textContent = '⏳ 保存配置...';
+  const res = await fetch('/api/config/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appId, appSecret: secret })
+  });
+  const data = await res.json();
+  out.textContent = data.message || data.error;
+  if (data.success) { refreshAll(); showToast('✅ 飞书配置已保存'); }
+}
+
+// ===== 急救中心 =====
+async function emergencyRestore() {
+  const btn = document.getElementById('emergencyBtn');
+  const out = document.getElementById('emergencyOutput');
+  const prog = document.getElementById('emergencyProgress');
+  btn.disabled = true; btn.innerHTML = '⏳ 抢救中...';
+  out.classList.add('show'); out.textContent = '📋 抢救过程:\n';
+  prog.querySelector('.fill').style.width = '20%';
+
+  const res = await fetch('/api/emergency/restore', { method: 'POST' });
+  const data = await res.json();
+
+  prog.querySelector('.fill').style.width = '100%';
+  out.textContent += `✅ 已恢复文件: ${data.restored?.join(', ') || '无'}\n`;
+  out.textContent += `📦 已自动备份: ${data.backupSaved ? '是 ✓' : '否'}\n`;
+  out.textContent += `\n${data.message}`;
+
+  btn.disabled = false; btn.innerHTML = '🚨 一键抢救';
+  setTimeout(() => { prog.querySelector('.fill').style.width = '0%'; }, 3000);
+  showToast(data.message);
+}
+
+async function createBackup() {
+  const btn = event.target;
+  const out = document.getElementById('backupOutput');
+  const prog = document.getElementById('backupProgress');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 备份中...';
+  out.classList.add('show'); out.textContent = '⏳ 正在备份...';
+  prog.classList.add('show'); prog.querySelector('.fill').style.width = '50%';
+
+  const res = await fetch('/api/backup/create', { method: 'POST' });
+  const data = await res.json();
+
+  prog.querySelector('.fill').style.width = '100%';
+  if (data.success) {
+    out.textContent = `✅ 备份成功！已保存 ${data.count} 项文件\n📁 ${data.backupPath}`;
+    listBackups();
+    showToast(`✅ 备份成功 (${data.count} 项)`);
+  } else {
+    out.textContent = '❌ 备份失败';
+  }
+  btn.disabled = false; btn.innerHTML = '📦 立即备份';
+  setTimeout(() => { prog.classList.remove('show'); }, 2000);
+}
+
+async function listBackups() {
+  try {
+    const res = await fetch('/api/backup/list');
+    const data = await res.json();
+    const list = document.getElementById('backupHistory');
+    if (!data.backups || data.backups.length === 0) {
+      list.innerHTML = '<div style="color:var(--text2);font-size:13px">暂无备份，建议定期手动备份</div>';
+      return;
+    }
+    list.innerHTML = data.backups.map(b => {
+      const time = new Date(b.time).toLocaleString('zh-CN');
+      const size = (b.size / 1024).toFixed(1) + ' KB';
+      return `<div class="backup-item"><span>📁 ${b.name}</span><span class="time">${time} · ${size}</span></div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+// ===== 智能诊断 (从首页调用) =====
 async function runDiagnostics() {
-  const healthRing = document.getElementById('healthRing');
-  const healthScore = document.getElementById('healthScore');
-  const healthLabel = document.getElementById('healthLabel');
-  const healthSummary = document.getElementById('healthSummary');
+  const healthRing = document.getElementById('homeHealthRing');
+  const healthScore = document.getElementById('homeHealthScore');
+  const healthLabel = document.getElementById('homeHealthLabel');
   const resultDiv = document.getElementById('diagnosticsResult');
   const issuesList = document.getElementById('issuesList');
   const out = document.getElementById('diagnosticsOutput');
@@ -1165,10 +1124,7 @@ async function runDiagnostics() {
   const statusClass = data.status === 'healthy' ? 'healthy' : (data.status === 'fair' ? 'fair' : 'poor');
   healthRing.className = 'health-ring ' + statusClass;
   healthRing.style.setProperty('--pct', data.healthScore + '%');
-
-  const labels = { healthy: '🟢 系统健康', fair: '🟡 需要注意', poor: '🔴 需要修复' };
-  healthLabel.textContent = labels[data.status] || '未知';
-  healthSummary.textContent = `${data.summary.critical} 个严重 · ${data.summary.error} 个错误 · ${data.summary.warning} 个警告 · ${data.summary.info} 条提示`;
+  healthLabel.textContent = data.status === 'healthy' ? '🟢 系统健康' : (data.status === 'fair' ? '🟡 需要注意' : '🔴 需要修复');
 
   if (data.issues.length > 0) {
     resultDiv.style.display = 'block';
@@ -1191,7 +1147,6 @@ async function runDiagnostics() {
 async function autoFix(endpoint) {
   const out = document.getElementById('diagnosticsOutput');
   out.classList.add('show'); out.textContent = '⏳ 正在自动修复...';
-  
   const res = await fetch('/api/diagnostics/fix', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1199,414 +1154,11 @@ async function autoFix(endpoint) {
   });
   const data = await res.json();
   out.textContent = data.output || data.error || '修复指令已发送';
-  if (data.success) showToast('✅ 修复完成，建议重新扫描');
+  if (data.success) showToast('✅ 修复完成，建议重新检查');
 }
 
-// ===== 一键部署 =====
-document.getElementById('deployType')?.addEventListener('change', function() {
-  document.getElementById('domainGroup').style.display = this.value === 'nginx' ? 'block' : 'none';
-});
-
-async function generateDeployConfig() {
-  const type = document.getElementById('deployType').value;
-  const name = document.getElementById('deployName').value;
-  const port = document.getElementById('deployPort').value;
-  const domain = document.getElementById('deployDomain').value;
-  const out = document.getElementById('deployOutput');
-  const prog = document.getElementById('deployProgress');
-  const fileList = document.getElementById('deployFileList');
-  const filesDiv = document.getElementById('deployFiles');
-
-  out.classList.add('show'); out.textContent = '⏳ 正在生成配置...';
-  prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
-
-  const res = await fetch('/api/deploy/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type, name, port: port || '18928', domain })
-  });
-  const data = await res.json();
-
-  prog.querySelector('.fill').style.width = '100%';
-
-  if (data.success && data.files) {
-    out.textContent = `✅ ${type} 配置已生成!\n共 ${Object.keys(data.files).length} 个文件`;
-    filesDiv.style.display = 'block';
-    
-    fileList.innerHTML = Object.entries(data.files).map(([filename, content]) => `
-      <div class="deploy-file">
-        <div class="file-header" onclick="toggleFileBody(this)">
-          📄 ${filename}
-          <span style="font-size:11px;color:var(--text2)">点击展开</span>
-        </div>
-        <div class="file-body">${escapeHtml(content)}</div>
-      </div>
-    `).join('');
-    
-    showToast(`✅ 已生成 ${Object.keys(data.files).length} 个文件`);
-  } else {
-    out.textContent = '❌ ' + (data.error || '生成失败');
-  }
-
-  setTimeout(() => { prog.classList.remove('show'); }, 2000);
-}
-
-function toggleFileBody(header) {
-  const body = header.nextElementSibling;
-  body.classList.toggle('show');
-  header.querySelector('span').textContent = body.classList.contains('show') ? '点击收起' : '点击展开';
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ===== 反馈 - 复制诊断信息 =====
-async function copyDiagnostics() {
-  try {
-    const res = await fetch('/api/diagnostics/copy');
-    const data = await res.json();
-    
-    if (data.success && data.info) {
-      await navigator.clipboard.writeText(data.info);
-      const overlay = document.getElementById('copySuccess');
-      overlay.classList.add('show');
-      setTimeout(() => overlay.classList.remove('show'), 2000);
-      showToast('✅ 诊断信息已复制 (' + data.lines + ' 行)');
-    } else {
-      showToast('❌ 生成诊断信息失败');
-    }
-  } catch(e) {
-    // Fallback: copy system basic info
-    const basic = `🦐 龙虾保姆 v2.0\n时间: ${new Date().toLocaleString()}\n系统: ${navigator.platform}\nUser-Agent: ${navigator.userAgent}`;
-    await navigator.clipboard.writeText(basic);
-    showToast('✅ 基本信息已复制');
-  }
-}
-
-// ===== 更新检查 =====
-async function checkUpdates() {
-  const out = document.getElementById('updateOutput');
-  const prog = document.getElementById('updateProgress');
-  const resultsDiv = document.getElementById('updateResults');
-  const ocInfo = document.getElementById('openclawUpdateInfo');
-  const selfInfo = document.getElementById('selfUpdateInfo');
-
-  out.classList.add('show'); out.textContent = '⏳ 正在检查更新...';
-  prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
-  resultsDiv.style.display = 'none';
-
-  const res = await fetch('/api/update/check');
-  const data = await res.json();
-
-  prog.querySelector('.fill').style.width = '100%';
-  resultsDiv.style.display = 'block';
-
-  // OpenClaw
-  if (data.openclaw) {
-    if (data.openclaw.hasUpdate) {
-      ocInfo.innerHTML = `
-        <div class="update-card">
-          <div class="update-icon">📦</div>
-          <div class="update-text">
-            <h4>有新版本可用!</h4>
-            <p>当前: ${data.openclaw.installed} → 最新: ${data.openclaw.latest}</p>
-            <button class="btn btn-primary btn-sm" onclick="installOpenclaw()">📦 立即更新</button>
-          </div>
-        </div>
-      `;
-    } else {
-      ocInfo.innerHTML = `
-        <div style="font-size:13px;color:var(--text2)">
-          ✅ 已是最新版本: <b>${data.openclaw.installed}</b>
-        </div>
-      `;
-    }
-  }
-
-  // 龙虾保姆自更新
-  if (data.self.updateAvailable) {
-    selfInfo.innerHTML = `
-      <div class="update-card">
-        <div class="update-icon">🦐</div>
-        <div class="update-text">
-          <h4>龙虾保姆 新版本: ${data.self.update.version}</h4>
-          <p>当前版本: v${data.self.currentVersion}</p>
-          <p style="margin-top:4px;font-size:11px;color:var(--text2)">${(data.self.update.notes || '').substring(0, 200)}</p>
-          <a href="${data.self.update.url}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none;display:inline-flex;margin-top:6px">📥 查看发布页</a>
-        </div>
-      </div>
-    `;
-    document.getElementById('updateBadge').style.display = 'inline';
-  } else {
-    selfInfo.innerHTML = `
-      <div style="font-size:13px;color:var(--text2)">
-        ✅ 龙虾保姆 v${data.self.currentVersion} 已是最新
-      </div>
-    `;
-  }
-
-  out.textContent = `✅ 检查完成`;
-  setTimeout(() => { prog.classList.remove('show'); }, 2000);
-}
-
-// ===== 急诊中心 =====
-async function emergencyRestore() {
-  const btn = document.getElementById('emergencyBtn');
-  const out = document.getElementById('emergencyOutput');
-  const prog = document.getElementById('emergencyProgress');
-  btn.disabled = true; btn.innerHTML = '⏳ 抢救中...';
-  out.classList.add('show'); out.textContent = '📋 抢救过程:\n';
-  prog.querySelector('.fill').style.width = '20%';
-  
-  const res = await fetch('/api/emergency/restore', { method: 'POST' });
-  const data = await res.json();
-  
-  prog.querySelector('.fill').style.width = '100%';
-  out.textContent += `✅ 身份文件已恢复: ${data.restored.join(', ') || '无'}\n`;
-  out.textContent += `📦 备份已保存: ${data.backupSaved ? '是' : '否'}\n`;
-  out.textContent += `\n${data.message}`;
-  
-  btn.disabled = false; btn.innerHTML = '🚨 一键抢救';
-  setTimeout(() => { prog.querySelector('.fill').style.width = '0%'; }, 3000);
-  showToast(data.message);
-}
-
-// ===== 备份医生 =====
-async function createBackup() {
-  const btn = event.target;
-  const out = document.getElementById('backupOutput');
-  const prog = document.getElementById('backupProgress');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 备份中...';
-  out.classList.add('show'); out.textContent = '⏳ 正在备份...';
-  prog.classList.add('show'); prog.querySelector('.fill').style.width = '50%';
-  
-  const res = await fetch('/api/backup/create', { method: 'POST' });
-  const data = await res.json();
-  
-  prog.querySelector('.fill').style.width = '100%';
-  if (data.success) {
-    out.textContent = `✅ 备份成功！已保存 ${data.count} 项文件\n📁 ${data.backupPath}`;
-    listBackups();
-    showToast(`✅ 备份成功 (${data.count} 项)`);
-  } else {
-    out.textContent = '❌ 备份失败';
-  }
-  btn.disabled = false; btn.innerHTML = '📦 立即备份';
-  setTimeout(() => { prog.classList.remove('show'); }, 2000);
-}
-
-async function listBackups() {
-  try {
-    const res = await fetch('/api/backup/list');
-    const data = await res.json();
-    const list = document.getElementById('backupHistory');
-    if (!data.backups || data.backups.length === 0) {
-      list.innerHTML = '<div style="color:var(--text2);font-size:12px">暂无备份</div>';
-      return;
-    }
-    list.innerHTML = data.backups.map(b => {
-      const time = new Date(b.time).toLocaleString('zh-CN');
-      const size = (b.size / 1024).toFixed(1) + ' KB';
-      return `<div class="backup-item"><span>📁 ${b.name}</span><span class="time">${time} · ${size}</span></div>`;
-    }).join('');
-    
-    const bl = document.getElementById('backupList');
-    if (bl && data.backups.length > 0) {
-      bl.innerHTML = data.backups.slice(0, 3).map(b =>
-        `📁 ${b.name} — ${new Date(b.time).toLocaleString('zh-CN')}`
-      ).join('<br>');
-    }
-  } catch(e) {}
-}
-
-// ===== 视频分析 =====
-let selectedVideoFile = null;
-let videoTaskId = null;
-let videoPollTimer = null;
-
-function handleDragOver(e) {
-  e.preventDefault(); e.stopPropagation();
-  document.getElementById('videoDropZone').style.borderColor = 'var(--accent)';
-  document.getElementById('videoDropZone').style.background = 'rgba(255,123,43,0.05)';
-}
-function handleDragLeave(e) {
-  e.preventDefault(); e.stopPropagation();
-  document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
-  document.getElementById('videoDropZone').style.background = 'transparent';
-}
-function handleDrop(e) {
-  e.preventDefault(); e.stopPropagation();
-  document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
-  document.getElementById('videoDropZone').style.background = 'transparent';
-  const files = e.dataTransfer.files;
-  if (files.length > 0) setVideoFile(files[0]);
-}
-function handleFileSelect(e) {
-  if (e.target.files.length > 0) setVideoFile(e.target.files[0]);
-}
-function setVideoFile(file) {
-  const validTypes = ['.mp4', '.avi', '.mov', '.mkv', '.webm'];
-  const ext = '.' + file.name.split('.').pop().toLowerCase();
-  if (!validTypes.includes(ext)) {
-    showToast('不支持的文件格式，请使用: ' + validTypes.join(', '));
-    return;
-  }
-  selectedVideoFile = file;
-  const size = (file.size / (1024 * 1024)).toFixed(1);
-  document.getElementById('videoFileInfo').style.display = 'block';
-  document.getElementById('videoFileInfo').innerHTML = `✅ 已选择: <b>${file.name}</b> (${size} MB)`;
-  document.getElementById('videoFilePath').value = '';
-}
-
-async function startVideoAnalysis() {
-  const btn = document.getElementById('videoAnalyzeBtn');
-  const filePath = document.getElementById('videoFilePath').value.trim();
-  const progressDiv = document.getElementById('videoProgress');
-  const resultDiv = document.getElementById('videoResult');
-  const errorDiv = document.getElementById('videoError');
-  const progressBar = document.getElementById('videoProgressBar').querySelector('.fill');
-  const progressMsg = document.getElementById('videoProgressMessage');
-
-  errorDiv.style.display = 'none';
-  resultDiv.style.display = 'none';
-  const visionModel = document.getElementById('visionModel').value;
-
-  if (!selectedVideoFile && !filePath) {
-    showToast('请先选择视频文件或输入文件路径');
-    return;
-  }
-
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 分析中...';
-  progressDiv.style.display = 'block';
-  progressBar.style.width = '5%';
-  progressMsg.textContent = '正在提交任务...';
-
-  try {
-    let body;
-    if (filePath) {
-      body = JSON.stringify({ videoPath: filePath, model: visionModel });
-    } else {
-      const reader = new FileReader();
-      const base64 = await new Promise((resolve, reject) => {
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(selectedVideoFile);
-      });
-      body = JSON.stringify({ videoData: base64, fileName: selectedVideoFile.name, model: visionModel });
-    }
-
-    progressMsg.textContent = '正在提交任务...';
-    progressBar.style.width = '10%';
-
-    const res = await fetch('/api/video/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body
-    });
-    const data = await res.json();
-
-    if (!data.success) {
-      showVideoError(data.error || '提交任务失败');
-      return;
-    }
-
-    videoTaskId = data.taskId;
-    startVideoPolling(data.taskId);
-  } catch(e) {
-    showVideoError('连接失败: ' + e.message);
-  }
-}
-
-function startVideoPolling(taskId) {
-  const progressBar = document.getElementById('videoProgressBar').querySelector('.fill');
-  const progressMsg = document.getElementById('videoProgressMessage');
-  let stuckCount = 0;
-
-  videoPollTimer = setInterval(async () => {
-    try {
-      const res = await fetch('/api/video/analyze/status/' + taskId);
-      const data = await res.json();
-
-      if (data.success && data.status === 'done' && data.result) {
-        clearInterval(videoPollTimer); videoPollTimer = null;
-        displayVideoResult(data.result);
-        return;
-      }
-      if (!data.success && data.status === 'error') {
-        clearInterval(videoPollTimer); videoPollTimer = null;
-        showVideoError(data.error || '分析失败');
-        return;
-      }
-      if (data.success) {
-        progressBar.style.width = (data.progress || 0) + '%';
-        progressMsg.textContent = data.message || '处理中...';
-        stuckCount = 0;
-      }
-    } catch(e) {
-      stuckCount++;
-      if (stuckCount > 30) {
-        clearInterval(videoPollTimer); videoPollTimer = null;
-        showVideoError('连接超时，请重试');
-      }
-    }
-  }, 1000);
-}
-
-function displayVideoResult(result) {
-  const btn = document.getElementById('videoAnalyzeBtn');
-  btn.disabled = false; btn.innerHTML = '🚀 开始分析';
-  document.getElementById('videoProgress').style.display = 'none';
-  document.getElementById('videoResult').style.display = 'block';
-  document.getElementById('videoError').style.display = 'none';
-
-  const info = result.videoInfo || {};
-  const infoDiv = document.getElementById('videoInfo');
-  infoDiv.innerHTML = `
-    <div>⏱ 时长: <b>${info.duration ? info.duration.toFixed(1) + 's' : '-'}</b></div>
-    <div>📐 分辨率: <b>${info.width}x${info.height}</b></div>
-    <div>🎞 编码: <b>${info.codec || '-'}</b></div>
-    <div>📦 格式: <b>${info.format || '-'}</b></div>
-  `;
-  const analysisDiv = document.getElementById('videoAnalysis');
-  analysisDiv.textContent = result.analysis || 'AI 分析结果为空';
-
-  if (result.segments && result.segments.length > 0) {
-    const segmentsCard = document.getElementById('videoSegmentsCard');
-    const segmentsDiv = document.getElementById('videoSegments');
-    segmentsCard.style.display = 'block';
-    segmentsDiv.innerHTML = result.segments.map((seg, i) => `
-      <div style="background:var(--bg3);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px">
-        <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i + 1}</span>
-        <span style="font-weight:600;color:var(--accent2);font-family:monospace">${seg.timestamp}</span>
-      </div>
-    `).join('');
-  }
-  showToast('✅ 视频分析完成');
-}
-
-function showVideoError(msg) {
-  const btn = document.getElementById('videoAnalyzeBtn');
-  btn.disabled = false; btn.innerHTML = '🚀 开始分析';
-  document.getElementById('videoProgress').style.display = 'none';
-  document.getElementById('videoResult').style.display = 'none';
-  document.getElementById('videoError').style.display = 'block';
-  document.getElementById('videoError').textContent = '❌ ' + msg;
-}
-
-function resetVideoAnalysis() {
-  selectedVideoFile = null; videoTaskId = null;
-  if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-  document.getElementById('videoResult').style.display = 'none';
-  document.getElementById('videoError').style.display = 'none';
-  document.getElementById('videoFileInfo').style.display = 'none';
-  document.getElementById('videoFilePath').value = '';
-  document.getElementById('videoFileInput').value = '';
-}
-
-// ===== Initialize =====
-refreshStatus();
-loadDashboard();
+// ===== 初始化 =====
+refreshAll();
 listBackups();
 </script>
 </body>
