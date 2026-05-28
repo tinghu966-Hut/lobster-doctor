@@ -146,7 +146,7 @@ app.get('/api/dashboard', (req, res) => {
   let gatewayOnline = false;
   try {
     const gwInfo = safeExec('openclaw gateway status 2>nul || call openclaw gateway status', { timeout: 5000 });
-    gatewayOnline = gwInfo && (gwInfo.includes('running') || gwInfo.includes('online') || gwInfo.includes('启动'));
+    gatewayOnline = gwInfo && (gwInfo.includes('running') || gwInfo.includes('online'));
   } catch(e) {}
 
   // 系统资源
@@ -316,6 +316,9 @@ app.get('/api/diagnostics', async (req, res) => {
       const key = auth['deepseek:default'].apiKey || '';
       if (key && key.length > 10) {
         const testResult = await testDeepSeekKey(key);
+        if (testResult !== 'ok') {
+          issues.push({ severity: 'error', category: '模型', title: 'DeepSeek API Key 无效', fix: '请检查 DeepSeek API Key 是否正确，或在「模型管家」中重新配置', autoFixable: false });
+        }
       }
     }
   }
@@ -657,7 +660,7 @@ app.post('/api/emergency/restore', (req, res) => {
     }
   }
 
-  exec(`cd /d "${ws}" && git checkout HEAD -- IDENTITY.md USER.md SOUL.md AGENTS.md TOOLS.md HEARTBEAT.md RECOVERY.md 2>nul && git checkout HEAD -- memory\\ 2>nul && git checkout HEAD -- .learnings\\ 2>nul`, { 
+  exec(`cd /d "${ws}" && git checkout HEAD -- IDENTITY.md USER.md SOUL.md AGENTS.md TOOLS.md HEARTBEAT.md RECOVERY.md 2>nul && git checkout HEAD -- "memory/" 2>nul && git checkout HEAD -- ".learnings/" 2>nul`, { 
     shell: 'cmd.exe',
     maxBuffer: 1024 * 1024
   }, (err, stdout, stderr) => {

@@ -384,7 +384,7 @@
       • 需要部署到服务器？试试一键部署
     </div>
     <div class="btn-group" style="flex-direction:column;gap:10px">
-      <button class="btn btn-success btn-lg btn-block" onclick="completeOnboarding()" style="max-width:300px">
+      <button class="btn btn-success btn-lg btn-block" onclick="completeOnboarding(this)" style="max-width:300px">
         🎊 开始使用龙虾保姆！
       </button>
       <button class="btn btn-outline btn-sm" onclick="window.close()" style="font-size:13px">
@@ -678,8 +678,8 @@ function buildCompleteList() {
 }
 
 // === Complete ===
-async function completeOnboarding() {
-  const btn = event.target;
+async function completeOnboarding(btn) {
+  // btn is passed from onclick
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> 完成中...';
 
