@@ -60,6 +60,55 @@ function getAuthProfiles() {
 }
 
 // ============================================================
+// Helper: HTTPS 请求工具（避免 API Key 泄露到命令行）
+// ============================================================
+
+function httpsGetJson(hostname, path, headers) {
+  return new Promise((resolve) => {
+    const options = { hostname, path, method: 'GET', headers, rejectUnauthorized: true };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, data, statusCode: res.statusCode }));
+    });
+    req.on('error', (e) => resolve({ ok: false, data: e.message }));
+    req.end();
+  });
+}
+
+function httpsPostJson(hostname, path, body, headers = {}) {
+  return new Promise((resolve) => {
+    const bodyStr = JSON.stringify(body);
+    const options = {
+      hostname, path, method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(bodyStr), ...headers },
+      rejectUnauthorized: true,
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, data: JSON.parse(data), statusCode: res.statusCode }); }
+        catch(e) { resolve({ ok: false, data: data, statusCode: res.statusCode }); }
+      });
+    });
+    req.on('error', (e) => resolve({ ok: false, data: e.message }));
+    req.write(bodyStr);
+    req.end();
+  });
+}
+
+async function testFeishuConnection(appId, appSecret) {
+  const result = await httpsPostJson('open.feishu.cn', '/open-apis/auth/v3/tenant_access_token/internal', { app_id: appId, app_secret: appSecret });
+  return (result.ok && result.data && result.data.code === 0) ? 'ok' : 'fail';
+}
+
+async function testDeepSeekKey(apiKey) {
+  const result = await httpsGetJson('api.deepseek.com', '/models', { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' });
+  return result.ok ? 'ok' : 'fail';
+}
+
+// ============================================================
 // API: 系统检测 (升级版)
 // ============================================================
 app.get('/api/status', (req, res) => {
@@ -191,7 +240,7 @@ app.get('/api/dashboard', (req, res) => {
 // ============================================================
 // API: 智能诊断 (新增)
 // ============================================================
-app.get('/api/diagnostics', (req, res) => {
+app.get('/api/diagnostics', async (req, res) => {
   const issues = [];
 
   // 1. 检查 Node.js
@@ -241,8 +290,8 @@ app.get('/api/diagnostics', (req, res) => {
     if (!appId || !appSecret) {
       issues.push({ severity: 'warning', category: '飞书', title: '飞书配置不完整', fix: '请在「飞书助手」中填写完整的 App ID 和 App Secret', autoFixable: false });
     } else {
-      // 验证飞书连通性
-      const testResult = safeExec(`powershell -NoProfile -Command "try{$b=@{app_id='${appId.replace(/'/g,"''")}';app_secret='${appSecret.replace(/'/g,"''")}'}|ConvertTo-Json;$r=Invoke-RestMethod -Uri 'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal' -Method Post -Body $b -ContentType 'application/json' -ErrorAction Stop;if($r.code-eq0){'ok'}else{'fail'}}catch{'err'}"`, { timeout: 10000 });
+      // 验证飞书连通性（安全方式，不泄露 Secret）
+      const testResult = await testFeishuConnection(appId, appSecret);
       if (testResult !== 'ok') {
         issues.push({ severity: 'error', category: '飞书', title: '飞书连接失败', fix: '检查 App ID 和 App Secret 是否有效，或在飞书开放平台重新发布应用', autoFixable: false });
       }
@@ -262,11 +311,11 @@ app.get('/api/diagnostics', (req, res) => {
   if (configuredModels.length === 0) {
     issues.push({ severity: 'info', category: '模型', title: '未配置 AI 模型', fix: '在「模型管家」中配置任意 API Key 即可使用 AI 功能', autoFixable: false });
   } else {
-    // 验证 DeepSeek key 是否有效
+    // 验证 DeepSeek key 是否有效（安全方式，不泄露 Key）
     if (configuredModels.includes('DeepSeek')) {
       const key = auth['deepseek:default'].apiKey || '';
       if (key && key.length > 10) {
-        const testResult = safeExec(`powershell -NoProfile -Command "try{$b=ConvertTo-Json @{model='deepseek-chat';messages=@(@{role='user';content='hi'})};$h=@{};$h['Authorization']='Bearer ${key.substring(0, 20)}...';$r=Invoke-RestMethod -Uri 'https://api.deepseek.com/models' -Method Get -Headers $h -ErrorAction Stop;'ok'}catch{'err'}"`, { timeout: 5000 });
+        const testResult = await testDeepSeekKey(key);
       }
     }
   }
@@ -462,21 +511,19 @@ app.post('/api/config/feishu', (req, res) => {
 // ============================================================
 // API: 测试飞书连接
 // ============================================================
-app.post('/api/test/feishu', (req, res) => {
+app.post('/api/test/feishu', async (req, res) => {
   const { appId, appSecret } = req.body;
   
-  const powershell = `
-    try {
-      $body = @{ app_id = "${appId.replace(/"/g, '`"')}"; app_secret = "${appSecret.replace(/"/g, '`"')}" } | ConvertTo-Json
-      $resp = Invoke-RestMethod -Uri "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal" -Method Post -Body $body -ContentType "application/json" -ErrorAction Stop
-      if ($resp.code -eq 0) { Write-Output "✅ 连接成功! Tenant: $($resp.tenant_access_token.Substring(0,10))..." }
-      else { Write-Output "❌ 错误: $($resp.msg)" }
-    } catch { Write-Output "❌ 连接失败: $_" }
-  `;
+  const result = await httpsPostJson('open.feishu.cn', '/open-apis/auth/v3/tenant_access_token/internal', { app_id: appId, app_secret: appSecret });
   
-  exec(`powershell -NoProfile -Command "${powershell.replace(/"/g, '\\"')}"`, { shell: 'cmd.exe' }, (err, stdout) => {
-    res.json({ output: stdout });
-  });
+  if (result.ok && result.data && result.data.code === 0) {
+    const preview = result.data.tenant_access_token ? result.data.tenant_access_token.substring(0, 10) + '...' : 'N/A';
+    res.json({ output: `✅ 连接成功! Tenant: ${preview}` });
+  } else if (result.data && result.data.msg) {
+    res.json({ output: `❌ 错误: ${result.data.msg}` });
+  } else {
+    res.json({ output: `❌ 连接失败: ${result.data || '未知错误'}` });
+  }
 });
 
 // ============================================================
@@ -1100,19 +1147,19 @@ app.get('/api/diagnostics/copy', async (req, res) => {
 // ============================================================
 
 function findFfmpeg() {
-  var paths = ['ffmpeg', 'D:\\ffmpeg\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe'];
-  for (var i = 0; i < paths.length; i++) {
+  const paths = ['ffmpeg', 'D:\\ffmpeg\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe'];
+  for (let i = 0; i < paths.length; i++) {
     try { execSync('"' + paths[i] + '" -version', { stdio: 'pipe' }); return paths[i]; } catch(e) {}
   }
   try {
-    var r = execSync('where ffmpeg 2>nul', { encoding: 'utf8', shell: 'cmd.exe' });
-    var line = r.trim().split('\r\n')[0] || r.trim().split('\n')[0];
+    const r = execSync('where ffmpeg 2>nul', { encoding: 'utf8', shell: 'cmd.exe' });
+    const line = r.trim().split('\r\n')[0] || r.trim().split('\n')[0];
     if (line) return line;
   } catch(e) {}
   return null;
 }
-var FFMPEG_PATH = findFfmpeg();
-var analysisTasks = new Map();
+const FFMPEG_PATH = findFfmpeg();
+const analysisTasks = new Map();
 
 function getDeepSeekKey() {
   if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
