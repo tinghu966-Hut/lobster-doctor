@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦐 龙虾保姆 — 开机引导向导</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #ff7b2b;
+    --accent2: #ff9c4a;
+    --green: #3fb950;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --gold: #d29922;
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { font-size: 30px; }
+  .title { font-size: 18px; font-weight: 700; color: var(--accent2); }
+  .subtitle { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+  /* ===== Progress Bar ===== */
+  .progress-section {
+    background: var(--bg2);
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .progress-header h2 { font-size: 20px; }
+  .progress-header .pct { font-size: 14px; color: var(--text2); }
+  .progress-track {
+    display: flex; gap: 4px; margin-bottom: 4px;
+  }
+  .progress-step {
+    flex: 1; height: 6px; border-radius: 3px;
+    background: var(--bg3); transition: all 0.4s;
+  }
+  .progress-step.done { background: var(--green); }
+  .progress-step.active { background: var(--accent); }
+  .step-labels {
+    display: flex; justify-content: space-between; font-size: 10px;
+    color: var(--text2); margin-top: 4px;
+  }
+
+  /* ===== Main Content ===== */
+  .main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 30px;
+  }
+  .step-container {
+    max-width: 640px; width: 100%;
+  }
+
+  .step-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    text-align: center;
+    display: none;
+    animation: fadeSlide 0.4s ease;
+  }
+  .step-card.active { display: block; }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+  .step-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .step-desc { font-size: 14px; color: var(--text2); line-height: 1.8; margin-bottom: 20px; }
+
+  .step-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 20px; border-radius: 20px; font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .step-status.done { background: rgba(63,185,80,0.15); color: var(--green); }
+  .step-status.pending { background: rgba(255,123,43,0.1); color: var(--accent2); }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #e06b20); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, var(--green), #2ea043); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+  .btn-lg { padding: 14px 36px; font-size: 16px; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+
+  .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+
+  /* ===== Details/Info Blocks ===== */
+  .info-block {
+    background: var(--bg3);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: left;
+    margin: 12px 0;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .info-block .label { color: var(--text2); font-size: 11px; text-transform: uppercase; margin-bottom: 6px; }
+  .info-block pre {
+    background: #000;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #7ee787;
+    margin-top: 8px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+
+  /* ===== Spinner ===== */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid var(--text2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Output ===== */
+  .output {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: #7ee787;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  /* ===== Complete ===== */
+  .complete-icon { font-size: 80px; margin-bottom: 12px; }
+  .complete-title { font-size: 28px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+  .complete-check-list { text-align: left; margin: 16px auto; max-width: 360px; }
+  .complete-check-list .item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 0; font-size: 14px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    .step-card { padding: 24px; }
+    .step-icon { font-size: 40px; }
+    .step-title { font-size: 20px; }
+    .progress-section { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🦐</div>
+    <div>
+      <div class="title">龙虾保姆 · 开机引导</div>
+      <div class="subtitle">一步步完成 OpenClaw 的安装和配置</div>
+    </div>
+  </div>
+  <div>
+    <button class="btn btn-outline btn-sm" onclick="skipOnboarding()" style="padding:6px 14px;font-size:12px">跳过引导</button>
+  </div>
+</div>
+
+<!-- ===== Progress ===== -->
+<div class="progress-section">
+  <div class="progress-header">
+    <h2>⚡ 设置进度</h2>
+    <span class="pct" id="progressPct">0%</span>
+  </div>
+  <div class="progress-track" id="progressTrack">
+    <div class="progress-step active" data-step="0"></div>
+    <div class="progress-step" data-step="1"></div>
+    <div class="progress-step" data-step="2"></div>
+    <div class="progress-step" data-step="3"></div>
+    <div class="progress-step" data-step="4"></div>
+  </div>
+  <div class="step-labels">
+    <span>欢迎</span>
+    <span>Node.js</span>
+    <span>OpenClaw</span>
+    <span>飞书</span>
+    <span>完成</span>
+  </div>
+</div>
+
+<!-- ===== Steps ===== -->
+<div class="main">
+<div class="step-container">
+
+  <!-- Step 0: 欢迎 -->
+  <div class="step-card active" id="step-0">
+    <span class="step-icon">🦐</span>
+    <div class="step-title">欢迎使用龙虾保姆！</div>
+    <div class="step-desc">
+      这里是你的 OpenClaw 一站式伴侣工具。<br>
+      本向导将带你完成以下设置，只需几分钟：
+    </div>
+    <div class="info-block" style="text-align:left;max-width:400px;margin:0 auto">
+      ✅ 检测系统环境<br>
+      ✅ 安装 Node.js（如需要）<br>
+      ✅ 安装 OpenClaw<br>
+      ✅ 配置飞书机器人（可选）<br>
+      ✅ 配置 AI 模型（可选）
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg" onclick="nextStep()">🚀 开始设置</button>
+    </div>
+  </div>
+
+  <!-- Step 1: Node.js -->
+  <div class="step-card" id="step-1">
+    <span class="step-icon" id="nodeIcon">🟢</span>
+    <div class="step-title">安装 Node.js</div>
+    <div class="step-desc">OpenClaw 运行在 Node.js 上，需要 v18 或更高版本。</div>
+    <div id="nodeStatus">
+      <span class="step-status pending">⏳ 检测中...</span>
+    </div>
+    <div id="nodeDetail" class="info-block" style="display:none"></div>
+    <div id="nodeOutput" class="output"></div>
+    <div class="btn-group">
+      <button class="btn btn-success" id="nodeSkipBtn" onclick="checkNode()">🔄 重新检测</button>
+      <button class="btn btn-outline" id="nodeManualBtn" style="display:none" onclick="openNodeSite()">📥 去 Node.js 官网下载</button>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="nextStep()" id="nodeNextBtn" disabled>继续 →</button>
+    </div>
+  </div>
+
+  <!-- Step 2: OpenClaw -->
+  <div class="step-card" id="step-2">
+    <span class="step-icon" id="ocIcon">📦</span>
+    <div class="step-title">安装 OpenClaw</div>
+    <div class="step-desc">核心组件，安装后就可以开始使用了。</div>
+    <div id="ocStatus">
+      <span class="step-status pending">⏳ 检测中...</span>
+    </div>
+    <div id="ocDetail" class="info-block" style="display:none"></div>
+    <div class="progress-bar" id="ocProgress" style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;display:none">
+      <div class="fill" style="height:100%;width:0%;background:linear-gradient(90deg, var(--accent), var(--green));border-radius:2px;transition:width 0.5s"></div>
+    </div>
+    <div id="ocOutput" class="output"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg" id="ocInstallBtn" onclick="installOpenclawWizard()">📦 安装 OpenClaw</button>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="nextStep()" id="ocNextBtn" disabled>继续 →</button>
+    </div>
+  </div>
+
+  <!-- Step 3: 飞书 (可选) -->
+  <div class="step-card" id="step-3">
+    <span class="step-icon">💬</span>
+    <div class="step-title">配置飞书机器人</div>
+    <div class="step-desc">（可选）配置飞书后，可以直接在飞书中和 AI 对话。</div>
+    <div id="feishuStatus">
+      <span class="step-status pending" id="feishuStatusBadge">⏳ 检测中...</span>
+    </div>
+    <div class="info-block" style="text-align:left">
+      <div class="label">📖 快速指引</div>
+      1. 打开 <a href="https://open.feishu.cn" target="_blank" style="color:var(--blue)">飞书开放平台</a><br>
+      2. 创建企业自建应用<br>
+      3. 获取 <b>App ID</b> 和 <b>App Secret</b><br>
+      4. 将信息填入下方并保存
+    </div>
+    <div style="margin:16px 0;text-align:left">
+      <div class="form-group" style="margin-bottom:10px">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">App ID</label>
+        <input type="text" id="feishuAppIdWiz" placeholder="cli_xxxxxxxxxxxxxxxxx" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none">
+      </div>
+      <div class="form-group">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">App Secret</label>
+        <input type="password" id="feishuSecretWiz" placeholder="输入 App Secret" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none">
+      </div>
+    </div>
+    <div id="feishuOutputWiz" class="output"></div>
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="testFeishuWiz()">🔌 测试连接</button>
+      <button class="btn btn-primary" onclick="saveFeishuWiz()">💾 保存并继续</button>
+      <button class="btn btn-outline" onclick="nextStep()">跳过 →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: 模型 -->
+  <div class="step-card" id="step-4">
+    <span class="step-icon" id="modelIcon">🤖</span>
+    <div class="step-title">配置 AI 模型</div>
+    <div class="step-desc">（可选）配置 API Key 后，AI 才能回答问题。推荐 DeepSeek，国内可直接使用。</div>
+    <div id="modelStatus">
+      <span class="step-status pending" id="modelStatusBadge">⏳ 检测中...</span>
+    </div>
+    <div style="margin:16px 0;text-align:left">
+      <div class="form-group" style="margin-bottom:10px">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">选择供应商</label>
+        <select id="modelProviderWiz" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none">
+          <option value="deepseek">DeepSeek（推荐）</option>
+          <option value="aliyun">阿里云通义千问</option>
+          <option value="openai">OpenAI</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">API Key</label>
+        <input type="password" id="modelApiKeyWiz" placeholder="sk-..." style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none">
+      </div>
+    </div>
+    <div id="modelOutputWiz" class="output"></div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveModelWiz()">💾 保存并继续</button>
+      <button class="btn btn-outline" onclick="nextStep()">跳过 →</button>
+    </div>
+  </div>
+
+  <!-- Step 5: 完成 -->
+  <div class="step-card" id="step-5">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">设置完成！</div>
+    <div class="step-desc">恭喜你完成了龙虾保姆的初始设置！<br>下面是你已完成的内容：</div>
+    <div class="complete-check-list" id="completeChecklist">
+      <div class="item"><span>⏳</span> 加载中...</div>
+    </div>
+    <div class="info-block" style="text-align:left;max-width:400px;margin:16px auto">
+      <b>💡 下一步做什么？</b><br><br>
+      • 在技能商店安装实用技能（自改进、GitHub、Tavily）<br>
+      • 试试视频分析功能<br>
+      • 使用智能诊断保持系统健康<br>
+      • 需要部署到服务器？试试一键部署
+    </div>
+    <div class="btn-group" style="flex-direction:column;gap:10px">
+      <button class="btn btn-success btn-lg btn-block" onclick="completeOnboarding()" style="max-width:300px">
+        🎊 开始使用龙虾保姆！
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="window.close()" style="font-size:13px">
+        关闭本页面
+      </button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// === State ===
+const TOTAL_STEPS = 5; // Steps 0-5 (index 0 is welcome, 5 is complete)
+let currentStep = 0;
+let stepStatus = [true, false, false, false, false, false]; // done flags
+
+// === Progress ===
+function updateProgress() {
+  const done = stepStatus.filter(Boolean).length;
+  const pct = Math.round((done / TOTAL_STEPS) * 100);
+  document.getElementById('progressPct').textContent = done + '/' + TOTAL_STEPS + ' (' + pct + '%)';
+
+  const bars = document.querySelectorAll('.progress-step');
+  bars.forEach((bar, i) => {
+    bar.classList.remove('done', 'active');
+    if (i < done) bar.classList.add('done');
+    else if (i === done) bar.classList.add('active');
+  });
+}
+
+// === Navigation ===
+function nextStep() {
+  if (currentStep < 5) {
+    stepStatus[currentStep] = true;
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    currentStep++;
+    document.getElementById('step-' + currentStep).classList.add('active');
+    updateProgress();
+
+    // Auto-check when entering a step
+    if (currentStep === 1) checkNode();
+    if (currentStep === 2) checkOpenclaw();
+    if (currentStep === 3) checkFeishu();
+    if (currentStep === 4) checkModel();
+    if (currentStep === 5) buildCompleteList();
+  }
+}
+
+function prevStep() {
+  if (currentStep > 0) {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    currentStep--;
+    document.getElementById('step-' + currentStep).classList.add('active');
+  }
+}
+
+// === Skip ===
+async function skipOnboarding() {
+  const res = await fetch('/api/onboarding/complete', { method: 'POST' });
+  window.location.href = '/';
+}
+
+// === Step 1: Node.js ===
+async function checkNode() {
+  const status = document.getElementById('nodeStatus');
+  const icon = document.getElementById('nodeIcon');
+  const detail = document.getElementById('nodeDetail');
+  const nextBtn = document.getElementById('nodeNextBtn');
+  const manualBtn = document.getElementById('nodeManualBtn');
+
+  status.innerHTML = '<span class="step-status pending">⏳ 检测 Node.js...</span>';
+  detail.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    const hasNode = data.checks.node;
+
+    if (hasNode) {
+      icon.textContent = '✅';
+      status.innerHTML = '<span class="step-status done">✅ Node.js 已安装</span>';
+      detail.style.display = 'block';
+      detail.innerHTML = '<div class="label">检测结果</div>Node.js 已就绪，可以继续安装 OpenClaw';
+      nextBtn.disabled = false;
+      manualBtn.style.display = 'none';
+    } else {
+      icon.textContent = '⚠️';
+      status.innerHTML = '<span class="step-status pending">⚠️ Node.js 未安装</span>';
+      detail.style.display = 'block';
+      detail.innerHTML = '<div class="label">需要安装 Node.js</div>请从官网下载 LTS 版本安装包，安装后点击"重新检测"。<br><br><b>推荐：</b>下载 v20 LTS 版本';
+      nextBtn.disabled = true;
+      manualBtn.style.display = 'inline-flex';
+    }
+  } catch(e) {
+    icon.textContent = '❌';
+    status.innerHTML = '<span class="step-status pending">❌ 检测失败</span>';
+  }
+}
+
+function openNodeSite() {
+  window.open('https://nodejs.org', '_blank');
+}
+
+// === Step 2: OpenClaw ===
+async function checkOpenclaw() {
+  const status = document.getElementById('ocStatus');
+  const icon = document.getElementById('ocIcon');
+  const detail = document.getElementById('ocDetail');
+  const installBtn = document.getElementById('ocInstallBtn');
+  const nextBtn = document.getElementById('ocNextBtn');
+
+  status.innerHTML = '<span class="step-status pending">⏳ 检测 OpenClaw...</span>';
+  detail.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    const hasOC = data.checks.openclaw;
+
+    if (hasOC) {
+      icon.textContent = '✅';
+      status.innerHTML = '<span class="step-status done">✅ OpenClaw 已安装</span>';
+      detail.style.display = 'block';
+      detail.innerHTML = '<div class="label">检测结果</div>OpenClaw 已安装，可直接继续';
+      installBtn.textContent = '✅ 已安装，更新？';
+      installBtn.disabled = false;
+      nextBtn.disabled = false;
+    } else {
+      icon.textContent = '📦';
+      status.innerHTML = '<span class="step-status pending">📦 OpenClaw 未安装</span>';
+      detail.style.display = 'block';
+      detail.innerHTML = '<div class="label">需要安装 OpenClaw</div>点击下方按钮开始安装。安装需要联网，可能需要几分钟。';
+      installBtn.textContent = '📦 安装 OpenClaw';
+      installBtn.disabled = false;
+      nextBtn.disabled = true;
+    }
+  } catch(e) {
+    status.innerHTML = '<span class="step-status pending">❌ 检测失败</span>';
+  }
+}
+
+async function installOpenclawWizard() {
+  const btn = document.getElementById('ocInstallBtn');
+  const output = document.getElementById('ocOutput');
+  const progress = document.getElementById('ocProgress');
+  const nextBtn = document.getElementById('ocNextBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 安装中...';
+  output.style.display = 'block';
+  output.textContent = '⏳ 正在安装 OpenClaw...';
+  progress.style.display = 'block';
+  progress.querySelector('.fill').style.width = '30%';
+
+  const res = await fetch('/api/install/openclaw', { method: 'POST' });
+  const data = await res.json();
+
+  progress.querySelector('.fill').style.width = '100%';
+  output.textContent = data.output;
+
+  if (data.success) {
+    btn.textContent = '✅ 安装成功！';
+    document.getElementById('ocIcon').textContent = '✅';
+    document.getElementById('ocStatus').innerHTML = '<span class="step-status done">✅ OpenClaw 安装成功</span>';
+    nextBtn.disabled = false;
+    setTimeout(() => {
+      progress.style.display = 'none';
+    }, 1500);
+  } else {
+    btn.textContent = '❌ 安装失败，重试';
+    btn.disabled = false;
+    btn.innerHTML = '🔄 重试安装';
+    setTimeout(() => {
+      progress.style.display = 'none';
+    }, 1500);
+  }
+}
+
+// === Step 3: 飞书 ===
+async function checkFeishu() {
+  const badge = document.getElementById('feishuStatusBadge');
+  try {
+    const res = await fetch('/api/onboarding/check');
+    const data = await res.json();
+    const feishuDone = data.steps[3].done;
+    if (feishuDone) {
+      badge.textContent = '✅ 飞书已配置';
+      badge.className = 'step-status done';
+    } else {
+      badge.textContent = '💬 可选配置';
+      badge.className = 'step-status pending';
+    }
+  } catch(e) {
+    badge.textContent = '💬 可选配置';
+  }
+}
+
+async function testFeishuWiz() {
+  const appId = document.getElementById('feishuAppIdWiz').value;
+  const secret = document.getElementById('feishuSecretWiz').value;
+  if (!appId || !secret) { showMsg('feishuOutputWiz', '请填写 App ID 和 App Secret'); return; }
+  showMsg('feishuOutputWiz', '⏳ 测试连接中...');
+  const res = await fetch('/api/test/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appId, appSecret: secret })
+  });
+  const data = await res.json();
+  showMsg('feishuOutputWiz', data.output);
+}
+
+async function saveFeishuWiz() {
+  const appId = document.getElementById('feishuAppIdWiz').value;
+  const secret = document.getElementById('feishuSecretWiz').value;
+  if (!appId || !secret) { showMsg('feishuOutputWiz', '请填写 App ID 和 App Secret'); return; }
+  showMsg('feishuOutputWiz', '⏳ 保存配置...');
+  const res = await fetch('/api/config/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appId, appSecret: secret })
+  });
+  const data = await res.json();
+  showMsg('feishuOutputWiz', data.message || data.error);
+  if (data.success) {
+    document.getElementById('feishuStatusBadge').textContent = '✅ 飞书已配置';
+    document.getElementById('feishuStatusBadge').className = 'step-status done';
+    nextStep();
+  }
+}
+
+// === Step 4: 模型 ===
+async function checkModel() {
+  const badge = document.getElementById('modelStatusBadge');
+  try {
+    const res = await fetch('/api/onboarding/check');
+    const data = await res.json();
+    const modelDone = data.steps[4].done;
+    if (modelDone) {
+      badge.textContent = '✅ AI 模型已配置';
+      badge.className = 'step-status done';
+    } else {
+      badge.textContent = '🤖 可选配置';
+      badge.className = 'step-status pending';
+    }
+  } catch(e) {
+    badge.textContent = '🤖 可选配置';
+  }
+}
+
+async function saveModelWiz() {
+  const provider = document.getElementById('modelProviderWiz').value;
+  const apiKey = document.getElementById('modelApiKeyWiz').value;
+  if (!apiKey) { showMsg('modelOutputWiz', '请输入 API Key'); return; }
+
+  showMsg('modelOutputWiz', '⏳ 保存配置...');
+  const res = await fetch('/api/config/model', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider, apiKey, baseUrl: '' })
+  });
+  const data = await res.json();
+  showMsg('modelOutputWiz', data.message || data.error);
+  if (data.success) {
+    document.getElementById('modelIcon').textContent = '✅';
+    document.getElementById('modelStatusBadge').textContent = '✅ AI 模型已配置';
+    document.getElementById('modelStatusBadge').className = 'step-status done';
+    nextStep();
+  }
+}
+
+// === Step 5: Complete ===
+function buildCompleteList() {
+  const list = document.getElementById('completeChecklist');
+  let html = '';
+
+  // Check each
+  fetch('/api/onboarding/check').then(r => r.json()).then(data => {
+    const steps = data.steps;
+    const items = [
+      { icon: '✅', text: '系统环境检测', done: true },
+      { icon: steps[1].done ? '✅' : '⚠️', text: 'Node.js ' + (steps[1].done ? '已安装' : '未安装（可后续安装）') },
+      { icon: steps[2].done ? '✅' : '⚠️', text: 'OpenClaw ' + (steps[2].done ? '已安装' : '未安装（可后续安装）') },
+      { icon: steps[3].done ? '✅' : '⏭️', text: '飞书配置 ' + (steps[3].done ? '已完成' : '已跳过') },
+      { icon: steps[4].done ? '✅' : '⏭️', text: 'AI 模型 ' + (steps[4].done ? '已配置' : '已跳过') },
+    ];
+    list.innerHTML = items.map(i => `<div class="item"><span>${i.icon}</span> ${i.text}</div>`).join('');
+  }).catch(() => {
+    list.innerHTML = '<div class="item"><span>✅</span> 设置已完成</div>';
+  });
+}
+
+// === Complete ===
+async function completeOnboarding() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 完成中...';
+
+  await fetch('/api/onboarding/complete', { method: 'POST' });
+
+  btn.innerHTML = '✅ 完成！';
+  setTimeout(() => {
+    window.location.href = '/';
+  }, 800);
+}
+
+// === Helpers ===
+function showMsg(id, msg) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  el.textContent = msg;
+}
+
+// === Init ===
+updateProgress();
+</script>
+</body>
+</html>

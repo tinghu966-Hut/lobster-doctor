@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦐 龙虾医生 — OpenClaw 中文伴侣</title>
+<title>🦐 龙虾保姆 — OpenClaw 一条龙服务</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -18,6 +18,7 @@
     --red: #f85149;
     --blue: #58a6ff;
     --gold: #d29922;
+    --purple: #a371f7;
     --radius: 8px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,21 +28,21 @@
     color: var(--text);
     min-height: 100vh;
   }
-  
+
   /* ===== Header ===== */
   .header {
     background: var(--bg2);
     border-bottom: 1px solid var(--border);
-    padding: 20px 30px;
+    padding: 16px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .header-left { display: flex; align-items: center; gap: 15px; }
-  .logo { font-size: 36px; }
-  .title { font-size: 22px; font-weight: 700; color: var(--accent2); }
-  .subtitle { font-size: 13px; color: var(--text2); margin-top: 2px; }
-  .header-right { display: flex; align-items: center; gap: 15px; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { font-size: 34px; }
+  .title { font-size: 20px; font-weight: 700; color: var(--accent2); }
+  .subtitle { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
   .status-dot {
     display: inline-block; width: 10px; height: 10px;
     border-radius: 50%; margin-right: 6px;
@@ -49,6 +50,44 @@
   .status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
   .status-text { font-size: 13px; color: var(--text2); }
+  .version-tag {
+    background: linear-gradient(135deg, var(--accent), #e06b20);
+    color: #fff; font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px;
+  }
+
+  /* ===== Onboarding Banner ===== */
+  .onboarding-banner {
+    background: linear-gradient(135deg, rgba(255,123,43,0.15), rgba(163,113,247,0.15));
+    border-bottom: 1px solid var(--accent);
+    padding: 10px 30px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 14px;
+  }
+  .onboarding-banner.show { display: flex; }
+  .onboarding-banner .btn-sm {
+    padding: 5px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .onboarding-banner .btn-sm:hover { filter: brightness(1.1); }
+  .onboarding-banner .dismiss {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    padding: 5px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+  }
 
   /* ===== Tabs ===== */
   .tabs {
@@ -60,16 +99,16 @@
     gap: 2px;
   }
   .tab {
-    padding: 14px 20px;
+    padding: 12px 16px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text2);
     border-bottom: 2px solid transparent;
     white-space: nowrap;
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
   .tab.active {
@@ -80,57 +119,93 @@
   .tab .badge {
     background: var(--accent);
     color: #fff;
-    font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 10px;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  .tab .badge-green {
+    background: var(--green);
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
     font-weight: 600;
   }
 
   /* ===== Panels ===== */
-  .panel { display: none; padding: 30px; max-width: 960px; margin: 0 auto; }
+  .panel { display: none; padding: 24px 30px; max-width: 1060px; margin: 0 auto; }
   .panel.active { display: block; }
-  .panel-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-  .panel-desc { color: var(--text2); margin-bottom: 25px; font-size: 14px; line-height: 1.7; }
+  .panel-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .panel-desc { color: var(--text2); margin-bottom: 20px; font-size: 13px; line-height: 1.7; }
 
   /* ===== Cards ===== */
   .card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
   }
-  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
 
-  /* ===== System Status ===== */
+  /* ===== Dashboard ===== */
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .dash-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .dash-card h3 { font-size: 13px; color: var(--text2); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .dash-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid rgba(48,54,61,0.5); }
+  .dash-row:last-child { border-bottom: none; }
+  .dash-row .label { color: var(--text2); }
+  .dash-row .value { font-weight: 500; }
+  .dash-row .value.ok { color: var(--green); }
+  .dash-row .value.fail { color: var(--red); }
+  .dash-row .value.warn { color: var(--gold); }
+
   .status-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   .status-item {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 15px;
+    padding: 14px;
     text-align: center;
   }
-  .status-item .icon { font-size: 28px; margin-bottom: 6px; }
-  .status-item .name { font-size: 12px; color: var(--text2); }
-  .status-item .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .status-item .icon { font-size: 26px; margin-bottom: 5px; }
+  .status-item .name { font-size: 11px; color: var(--text2); }
+  .status-item .value { font-size: 20px; font-weight: 700; margin-top: 3px; }
   .status-item .value.ok { color: var(--green); }
   .status-item .value.fail { color: var(--red); }
+  .status-item .value.warn { color: var(--gold); }
+
+  /* ===== Health Score ===== */
+  .health-ring {
+    width: 100px; height: 100px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 28px; font-weight: 700;
+  }
+  .health-ring.healthy { background: conic-gradient(var(--green) var(--pct), var(--bg3) var(--pct)); color: var(--green); }
+  .health-ring.fair { background: conic-gradient(var(--gold) var(--pct), var(--bg3) var(--pct)); color: var(--gold); }
+  .health-ring.poor { background: conic-gradient(var(--red) var(--pct), var(--bg3) var(--pct)); color: var(--red); }
 
   /* ===== Buttons ===== */
   .btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 22px;
+    padding: 9px 20px;
     border: none;
     border-radius: var(--radius);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
@@ -141,55 +216,58 @@
   .btn-primary { background: linear-gradient(135deg, var(--accent), #e06b20); color: #fff; }
   .btn-success { background: linear-gradient(135deg, var(--green), #2ea043); color: #fff; }
   .btn-danger { background: linear-gradient(135deg, var(--red), #d03533); color: #fff; }
+  .btn-purple { background: linear-gradient(135deg, var(--purple), #7c3aed); color: #fff; }
   .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
   .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
-  .btn-lg { padding: 14px 36px; font-size: 18px; }
+  .btn-lg { padding: 12px 30px; font-size: 16px; }
   .btn-block { width: 100%; justify-content: center; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
 
-  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
 
   /* ===== Form ===== */
-  .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
-  .form-group input, .form-group select {
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+  .form-group input, .form-group select, .form-group textarea {
     width: 100%;
-    padding: 10px 14px;
+    padding: 9px 12px;
     background: var(--bg3);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    font-size: 14px;
+    font-size: 13px;
     font-family: inherit;
     outline: none;
     transition: border 0.2s;
   }
-  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .form-group textarea { min-height: 80px; resize: vertical; font-family: monospace; font-size: 12px; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-hint { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
-  /* ===== Output ===== */
+  /* ===== Output / Log ===== */
   .output {
     background: #000;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 14px;
+    padding: 12px;
     font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.6;
-    max-height: 300px;
+    max-height: 250px;
     overflow-y: auto;
     white-space: pre-wrap;
     color: #7ee787;
     display: none;
-    margin-top: 12px;
+    margin-top: 10px;
   }
   .output.show { display: block; }
 
   /* ===== Loading ===== */
   .spinner {
     display: inline-block;
-    width: 16px; height: 16px;
+    width: 14px; height: 14px;
     border: 2px solid var(--text2);
     border-top-color: var(--accent);
     border-radius: 50%;
@@ -198,46 +276,69 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ===== Skill Grid ===== */
-  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
   .skill-card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 14px;
     cursor: pointer;
     transition: border 0.2s;
   }
   .skill-card:hover { border-color: var(--accent); }
-  .skill-card .name { font-weight: 600; font-size: 14px; }
-  .skill-card .desc { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
-  .skill-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-  .skill-card .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .skill-card .name { font-weight: 600; font-size: 13px; }
+  .skill-card .desc { font-size: 11px; color: var(--text2); margin-top: 5px; line-height: 1.5; }
+  .skill-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .skill-card .tag { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
   .skill-card .tag.installed { background: rgba(63,185,80,0.15); color: var(--green); }
   .skill-card .tag.available { background: rgba(88,166,255,0.15); color: var(--blue); }
 
   /* ===== Backup List ===== */
-  .backup-list { margin-top: 12px; }
+  .backup-list { margin-top: 10px; }
   .backup-item {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 14px; background: var(--bg3); border-radius: var(--radius);
-    margin-bottom: 6px; font-size: 13px;
+    padding: 8px 12px; background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 5px; font-size: 12px;
   }
-  .backup-item .time { color: var(--text2); font-size: 12px; }
+  .backup-item .time { color: var(--text2); font-size: 11px; }
 
   /* ===== Emergency ===== */
   .emergency-hero {
-    text-align: center; padding: 40px 20px;
+    text-align: center; padding: 30px 20px;
     background: linear-gradient(135deg, rgba(248,81,73,0.1), rgba(255,123,43,0.1));
     border: 1px solid rgba(248,81,73,0.3);
     border-radius: var(--radius);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
-  .emergency-hero h2 { font-size: 32px; margin-bottom: 10px; }
-  .emergency-hero p { color: var(--text2); margin-bottom: 20px; }
+  .emergency-hero h2 { font-size: 28px; margin-bottom: 8px; }
+  .emergency-hero p { color: var(--text2); margin-bottom: 16px; font-size: 13px; }
+
+  /* ===== Diagnostics ===== */
+  .issue-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px; background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 6px; border-left: 3px solid var(--border);
+  }
+  .issue-item.critical { border-left-color: var(--red); }
+  .issue-item.error { border-left-color: #f85149; }
+  .issue-item.warning { border-left-color: var(--gold); }
+  .issue-item.info { border-left-color: var(--blue); }
+  .issue-item .sev {
+    font-size: 10px; font-weight: 700; padding: 2px 6px;
+    border-radius: 6px; white-space: nowrap;
+  }
+  .issue-item .sev.critical { background: rgba(248,81,73,0.2); color: var(--red); }
+  .issue-item .sev.error { background: rgba(248,81,73,0.15); color: var(--red); }
+  .issue-item .sev.warning { background: rgba(210,153,34,0.15); color: var(--gold); }
+  .issue-item .sev.info { background: rgba(88,166,255,0.15); color: var(--blue); }
+  .issue-item .issue-body { flex: 1; }
+  .issue-item .issue-title { font-size: 13px; font-weight: 600; }
+  .issue-item .issue-desc { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .issue-item .issue-fix { margin-top: 6px; }
 
   /* ===== Progress ===== */
   .progress-bar {
-    height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 12px 0; display: none;
+    height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 10px 0; display: none;
   }
   .progress-bar.show { display: block; }
   .progress-bar .fill {
@@ -245,15 +346,73 @@
     border-radius: 2px; transition: width 0.5s;
   }
 
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 18px;
+    font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none; z-index: 1000;
+    max-width: 380px;
+  }
+  .toast.show { display: flex; align-items: center; gap: 8px; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .toast .close-toast {
+    margin-left: auto; cursor: pointer; color: var(--text2);
+    background: none; border: none; font-size: 16px;
+  }
+
+  /* ===== Deploy tab ===== */
+  .deploy-files { margin-top: 10px; }
+  .deploy-file {
+    background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 8px; overflow: hidden;
+  }
+  .deploy-file .file-header {
+    padding: 8px 12px; font-size: 12px; font-weight: 600;
+    background: rgba(255,255,255,0.03); display: flex;
+    justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .deploy-file .file-body {
+    padding: 12px; font-family: monospace; font-size: 11px;
+    white-space: pre-wrap; color: #7ee787; display: none;
+    max-height: 300px; overflow-y: auto;
+  }
+  .deploy-file .file-body.show { display: block; }
+
+  /* ===== Update ===== */
+  .update-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px; background: rgba(57,185,80,0.08);
+    border: 1px solid rgba(57,185,80,0.2);
+    border-radius: var(--radius); margin-bottom: 10px;
+  }
+  .update-card .update-icon { font-size: 28px; }
+  .update-card .update-text { flex: 1; }
+  .update-card .update-text h4 { font-size: 14px; }
+  .update-card .update-text p { font-size: 12px; color: var(--text2); }
+
+  /* ===== Feedback Toast ===== */
+  .copy-success { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--bg2); border: 1px solid var(--green);
+    padding: 20px 40px; border-radius: var(--radius);
+    font-size: 18px; text-align: center; z-index: 2000;
+    display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .copy-success.show { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
   /* ===== Responsive ===== */
   @media (max-width: 768px) {
-    .header { padding: 15px; flex-wrap: wrap; gap: 10px; }
-    .tabs { padding: 0 10px; }
-    .tab { padding: 12px 14px; font-size: 13px; }
-    .panel { padding: 20px 15px; }
+    .header { padding: 12px 15px; flex-wrap: wrap; gap: 8px; }
+    .tabs { padding: 0 8px; }
+    .tab { padding: 10px 12px; font-size: 12px; }
+    .panel { padding: 16px 12px; }
     .form-row { grid-template-columns: 1fr; }
     .status-grid { grid-template-columns: repeat(3, 1fr); }
     .skill-grid { grid-template-columns: 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+    .onboarding-banner { flex-wrap: wrap; text-align: center; padding: 10px 15px; }
   }
 </style>
 </head>
@@ -264,8 +423,8 @@
   <div class="header-left">
     <div class="logo">🦐</div>
     <div>
-      <div class="title">龙虾医生</div>
-      <div class="subtitle">OpenClaw 中文伴侣 · 安装 / 配置 / 急救</div>
+      <div class="title">龙虾保姆 <span class="version-tag">v2.0</span></div>
+      <div class="subtitle">OpenClaw 一条龙服务 · 安装 / 配置 / 运维 / 急救</div>
     </div>
   </div>
   <div class="header-right">
@@ -273,9 +432,16 @@
       <span class="status-dot online" id="statusDot"></span>
       <span class="status-text" id="statusText">检测中...</span>
     </div>
-    <button class="btn btn-outline" onclick="refreshStatus()" style="padding:6px 12px;font-size:12px">🔄 刷新</button>
-    <span class="version" style="font-size:12px;color:var(--text2)">v1.0</span>
+    <button class="btn btn-outline" onclick="refreshStatus()" style="padding:5px 10px;font-size:11px">🔄</button>
+    <button class="btn btn-outline" onclick="copyDiagnostics()" style="padding:5px 10px;font-size:11px" title="复制诊断信息">📋</button>
   </div>
+</div>
+
+<!-- ===== Onboarding Banner ===== -->
+<div class="onboarding-banner" id="onboardingBanner">
+  <span>🎉 欢迎使用龙虾保姆！看起来你还没有完成初始设置</span>
+  <button class="btn-sm" onclick="window.open('onboarding.html','_blank')">🚀 开始引导</button>
+  <button class="dismiss" onclick="dismissOnboarding()">稍后再说</button>
 </div>
 
 <!-- ===== Tabs ===== -->
@@ -293,10 +459,16 @@
     <span>🤖</span> 模型管家
   </div>
   <div class="tab" onclick="switchTab(this, 'skills')">
-    <span>🧩</span> 技能商店 <span class="badge">NEW</span>
+    <span>🧩</span> 技能商店
+  </div>
+  <div class="tab" onclick="switchTab(this, 'diagnostics')">
+    <span>🔍</span> 智能诊断 <span class="badge" id="diagBadge">NEW</span>
+  </div>
+  <div class="tab" onclick="switchTab(this, 'deploy')">
+    <span>📦</span> 一键部署 <span class="badge">NEW</span>
   </div>
   <div class="tab" onclick="switchTab(this, 'video')">
-    <span>🎥</span> 视频分析 <span class="badge">NEW</span>
+    <span>🎥</span> 视频分析
   </div>
   <div class="tab" onclick="switchTab(this, 'emergency')">
     <span>🚑</span> 急诊中心
@@ -304,15 +476,30 @@
   <div class="tab" onclick="switchTab(this, 'backup')">
     <span>📦</span> 备份医生
   </div>
+  <div class="tab" onclick="switchTab(this, 'updates')">
+    <span>🔄</span> 更新 <span class="badge-green" id="updateBadge" style="display:none">1</span>
+  </div>
 </div>
 
 <!-- ============================================================ -->
 <!-- PANEL: 仪表盘 -->
 <!-- ============================================================ -->
 <div class="panel active" id="panel-home">
-  <div class="panel-title">🏠 仪表盘</div>
-  <div class="panel-desc">系统状态一览。绿色=就绪，红色=需要处理。</div>
-  <div class="status-grid" id="statusGrid">
+  <div class="panel-title">🏠 实时仪表盘</div>
+  <div class="panel-desc">Gateway / 飞书 / 模型 / 系统资源 一目了然。</div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>🦐 服务状态</h3>
+      <div id="dashServices"></div>
+    </div>
+    <div class="dash-card">
+      <h3>💻 系统资源</h3>
+      <div id="dashSystem"></div>
+    </div>
+  </div>
+
+  <div class="status-grid" id="shortStatus">
     <div class="status-item"><div class="icon">🟢</div><div class="name">Node.js</div><div class="value" id="s-node">...</div></div>
     <div class="status-item"><div class="icon">🦐</div><div class="name">OpenClaw</div><div class="value" id="s-openclaw">...</div></div>
     <div class="status-item"><div class="icon">🎬</div><div class="name">FFmpeg</div><div class="value" id="s-ffmpeg">...</div></div>
@@ -324,18 +511,19 @@
   <div class="card">
     <div class="card-title">📋 快速操作</div>
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="switchTab(undefined, 'install')">🚀 安装 OpenClaw</button>
+      <button class="btn btn-primary" onclick="switchTab(undefined, 'install')">🚀 安装 / 更新</button>
       <button class="btn btn-success" onclick="switchTab(undefined, 'feishu')">💬 配置飞书</button>
+      <button class="btn btn-purple" onclick="switchTab(undefined, 'diagnostics')">🔍 智能诊断</button>
       <button class="btn btn-danger" onclick="switchTab(undefined, 'emergency')">🚑 一键急救</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">📖 关于龙虾医生</div>
-    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
-      龙虾医生是为中国 OpenClaw 用户打造的一站式伴侣工具。<br>
-      解决新手安装难、配置复杂、崩溃不知咋办等痛点。<br><br>
-      <b>七大模块：</b>智能安装 · 飞书助手 · 模型管家 · 技能商店 · 视频分析 · 急诊中心 · 备份医生
+    <div class="card-title">📖 关于龙虾保姆</div>
+    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
+      龙虾保姆是龙虾医生的升级版——从「急诊工具」进化为「一条龙服务」。<br>
+      从安装引导到日常运维，从智能诊断到一键部署，全包。<br><br>
+      <b>十大模块：</b>开机引导 · 仪表盘 · 智能安装 · 飞书助手 · 模型管家 · 技能商店 · 智能诊断 · 一键部署 · 急诊中心 · 备份医生
     </p>
   </div>
 </div>
@@ -350,11 +538,11 @@
   <div class="card">
     <div class="card-title">🔍 环境检测</div>
     <button class="btn btn-outline" onclick="refreshStatus()">🔄 重新检测</button>
-    <div id="installEnv" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
+    <div id="installEnv" style="margin-top:10px;font-size:12px;color:var(--text2)"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">🛠️ 一键安装 / 修复</div>
+    <div class="card-title">🛠️ 安装 / 修复</div>
     <div class="btn-group">
       <button class="btn btn-primary btn-lg" onclick="installOpenclaw()">📦 安装 / 更新 OpenClaw</button>
       <button class="btn btn-outline" onclick="fixPowershell()">🔧 修复 PowerShell</button>
@@ -365,11 +553,12 @@
 
   <div class="card">
     <div class="card-title">💡 安装说明</div>
-    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
       1. 本工具会自动检测你的系统环境<br>
       2. 如果 Node.js 未安装，请先<a href="https://nodejs.org" target="_blank" style="color:var(--blue)">去官网下载 Node.js</a><br>
       3. 点击上方按钮自动安装 OpenClaw<br>
-      4. 安装完成后配置飞书和模型即可使用
+      4. 安装完成后配置飞书和模型即可使用<br>
+      5. 首次使用建议运行<b>开机引导向导</b>完成全部配置
     </p>
   </div>
 </div>
@@ -402,7 +591,7 @@
 
   <div class="card">
     <div class="card-title">📖 获取方法</div>
-    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
       1. 打开 <a href="https://open.feishu.cn" target="_blank" style="color:var(--blue)">飞书开放平台</a><br>
       2. 创建企业自建应用 → 填写应用名称<br>
       3. 在"凭证与基础信息"中获取 App ID 和 App Secret<br>
@@ -445,7 +634,7 @@
 
   <div class="card">
     <div class="card-title">💡 推荐</div>
-    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
       <b>DeepSeek</b> — 国内直接访问，性价比高，适合新手<br>
       <b>阿里云通义千问</b> — 国内直接访问，有免费额度<br>
       <b>OpenAI</b> — 需要海外信用卡，访问需要代理
@@ -468,7 +657,7 @@
     <button class="btn btn-outline" onclick="searchSkills()">🔍 搜索</button>
     <div class="output" id="skillSearchOutput"></div>
     
-    <div class="skill-grid" id="skillResults" style="margin-top:15px"></div>
+    <div class="skill-grid" id="skillResults" style="margin-top:12px"></div>
   </div>
 
   <div class="card">
@@ -477,34 +666,119 @@
       <div class="skill-card">
         <div class="name">🦐 自改进</div>
         <div class="desc">自动记录错误和学习，持续优化表现</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('self-improving-agent')">安装</button></div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('self-improving-agent')">安装</button></div>
       </div>
       <div class="skill-card">
         <div class="name">🐙 GitHub</div>
         <div class="desc">GitHub 全套操作：Issue、PR、CI 日志</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('github')">安装</button></div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('github')">安装</button></div>
       </div>
       <div class="skill-card">
         <div class="name">🚀 部署助手</div>
         <div class="desc">一键生成 Docker、Nginx、CI/CD 配置</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('deploy-helper')">安装</button></div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('deploy-helper')">安装</button></div>
       </div>
       <div class="skill-card">
         <div class="name">🔍 Tavily 搜索</div>
         <div class="desc">联网搜索能力，实时获取信息</div>
-        <div class="footer"><span class="tag available">必备</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('tavily')">安装</button></div>
+        <div class="footer"><span class="tag available">必备</span><button class="btn btn-outline btn-sm" onclick="installSkill('tavily')">安装</button></div>
       </div>
       <div class="skill-card">
         <div class="name">🧪 任务流</div>
         <div class="desc">多步骤复杂任务编排，自动执行</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('taskflow')">安装</button></div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('taskflow')">安装</button></div>
       </div>
       <div class="skill-card">
         <div class="name">🧩 技能工坊</div>
         <div class="desc">自己动手创建和编辑技能</div>
-        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('skill-creator')">安装</button></div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline btn-sm" onclick="installSkill('skill-creator')">安装</button></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 智能诊断 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-diagnostics">
+  <div class="panel-title">🔍 智能诊断</div>
+  <div class="panel-desc">一键扫描所有可能的问题，给出修复建议。让你的系统始终健康。</div>
+
+  <div class="card" style="text-align:center">
+    <div class="health-ring" id="healthRing">
+      <span id="healthScore">--</span>
+    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:4px" id="healthLabel">扫描中...</div>
+    <div style="font-size:12px;color:var(--text2)" id="healthSummary"></div>
+    <div class="btn-group" style="justify-content:center;margin-top:12px">
+      <button class="btn btn-primary btn-lg" onclick="runDiagnostics()">🔍 立即扫描</button>
+      <button class="btn btn-outline" onclick="copyDiagnostics()">📋 复制诊断信息</button>
+    </div>
+  </div>
+
+  <div id="diagnosticsResult" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 诊断结果</div>
+      <div id="issuesList"></div>
+    </div>
+  </div>
+
+  <div class="output" id="diagnosticsOutput"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 一键部署 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-deploy">
+  <div class="panel-title">📦 一键部署</div>
+  <div class="panel-desc">利用 deploy-helper 技能，生成 Docker / Nginx / Systemd 配置。一键部署 OpenClaw 到服务器。</div>
+
+  <div class="card">
+    <div class="card-title">⚙️ 配置参数</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>部署类型</label>
+        <select id="deployType">
+          <option value="docker">Docker (推荐)</option>
+          <option value="nginx">Nginx 反向代理</option>
+          <option value="systemd">Systemd 服务</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>服务名称（可选）</label>
+        <input type="text" id="deployName" placeholder="如 my-openclaw">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>端口号（可选）</label>
+        <input type="text" id="deployPort" placeholder="如 18928">
+      </div>
+      <div class="form-group" id="domainGroup">
+        <label>域名（Nginx 必填）</label>
+        <input type="text" id="deployDomain" placeholder="如 openclaw.example.com">
+      </div>
+    </div>
+    <button class="btn btn-purple btn-lg btn-block" onclick="generateDeployConfig()">🚀 生成部署配置</button>
+    <div class="progress-bar" id="deployProgress"><div class="fill" style="width:0%"></div></div>
+    <div class="output" id="deployOutput"></div>
+  </div>
+
+  <div class="deploy-files" id="deployFiles" style="display:none">
+    <div class="card">
+      <div class="card-title">📄 生成的文件</div>
+      <div id="deployFileList"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 部署提示</div>
+    <p style="font-size:12px;line-height:1.8;color:var(--text2)">
+      <b>Docker 部署</b> — 适合服务器环境，隔离运行，随系统自启动<br>
+      <b>Nginx 反向代理</b> — 如需绑定域名，配合 SSL 证书使用<br>
+      <b>Systemd 服务</b> — Linux 系统下管理 OpenClaw 为系统服务<br><br>
+      需要先安装 <b>deploy-helper</b> 技能以获得最佳体验（在技能商店中安装）
+    </p>
   </div>
 </div>
 
@@ -518,11 +792,11 @@
   <div class="emergency-hero">
     <h2>🦐 → 💀 → 🦐</h2>
     <p>一键恢复身份、记忆、重启连接</p>
-    <button class="btn btn-danger btn-lg" onclick="emergencyRestore()" id="emergencyBtn" style="font-size:22px;padding:20px 50px">
+    <button class="btn btn-danger btn-lg" onclick="emergencyRestore()" id="emergencyBtn" style="font-size:20px;padding:18px 45px">
       🚨 一键抢救
     </button>
-    <div style="margin-top:12px;font-size:13px;color:var(--text2)">
-      点此按钮 → 自动备份当前状态 → 恢复身份文件 → 重启 Gateway
+    <div style="margin-top:10px;font-size:12px;color:var(--text2)">
+      自动备份 → 恢复身份文件 → 重启 Gateway
     </div>
   </div>
 
@@ -531,7 +805,7 @@
 
   <div class="card">
     <div class="card-title">📋 抢救记录</div>
-    <div id="backupList" style="font-size:13px;color:var(--text2)">暂无记录</div>
+    <div id="backupList" style="font-size:12px;color:var(--text2)">暂无记录</div>
   </div>
 </div>
 
@@ -552,9 +826,9 @@
   <div class="card">
     <div class="card-title">📚 备份历史</div>
     <div class="backup-list" id="backupHistory">
-      <div style="color:var(--text2);font-size:13px">加载中...</div>
+      <div style="color:var(--text2);font-size:12px">加载中...</div>
     </div>
-    <button class="btn btn-outline" onclick="listBackups()" style="margin-top:10px">🔄 刷新列表</button>
+    <button class="btn btn-outline" onclick="listBackups()" style="margin-top:8px">🔄 刷新列表</button>
   </div>
 </div>
 
@@ -567,18 +841,18 @@
 
   <div class="card">
     <div class="card-title">📤 选择视频文件</div>
-    <div id="videoDropZone" style="border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:12px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('videoFileInput').click()">
-      <div style="font-size:48px;margin-bottom:10px">🎬</div>
-      <div style="font-size:16px;font-weight:600;color:var(--text2)">拖拽视频文件到此处</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:6px">或点击选择文件</div>
+    <div id="videoDropZone" style="border:2px dashed var(--border);border-radius:var(--radius);padding:30px 20px;text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:10px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('videoFileInput').click()">
+      <div style="font-size:44px;margin-bottom:8px">🎬</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text2)">拖拽视频文件到此处</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:5px">或点击选择文件</div>
       <input type="file" id="videoFileInput" accept=".mp4,.avi,.mov,.mkv,.webm" style="display:none" onchange="handleFileSelect(event)">
     </div>
     <div class="form-group">
       <label>或输入视频文件路径（支持大文件）</label>
       <input type="text" id="videoFilePath" placeholder="D:\videos\example.mp4">
     </div>
-    <div id="videoFileInfo" style="font-size:13px;color:var(--text2);margin-bottom:12px;display:none"></div>
-    <div class="form-row" style="margin-bottom:12px">
+    <div id="videoFileInfo" style="font-size:12px;color:var(--text2);margin-bottom:10px;display:none"></div>
+    <div class="form-row" style="margin-bottom:10px">
       <div class="form-group">
         <label>视觉模型</label>
         <select id="visionModel">
@@ -596,30 +870,66 @@
     <div class="card">
       <div class="card-title">⏳ 分析进度</div>
       <div class="progress-bar show" id="videoProgressBar"><div class="fill" style="width:0%"></div></div>
-      <div id="videoProgressMessage" style="font-size:13px;color:var(--text2);text-align:center;margin-top:8px">初始化...</div>
+      <div id="videoProgressMessage" style="font-size:12px;color:var(--text2);text-align:center;margin-top:6px">初始化...</div>
     </div>
   </div>
 
   <div id="videoResult" style="display:none">
     <div class="card">
       <div class="card-title">📋 视频信息</div>
-      <div id="videoInfo" style="font-size:13px;color:var(--text2);display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+      <div id="videoInfo" style="font-size:12px;color:var(--text2);display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
     </div>
-
     <div class="card">
       <div class="card-title">📝 AI 分析报告</div>
-      <div id="videoAnalysis" style="font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap"></div>
+      <div id="videoAnalysis" style="font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap"></div>
     </div>
-
     <div class="card" id="videoSegmentsCard" style="display:none">
       <div class="card-title">🎯 关键场景</div>
-      <div id="videoSegments" style="display:grid;gap:8px"></div>
+      <div id="videoSegments" style="display:grid;gap:6px"></div>
     </div>
-
     <button class="btn btn-outline" onclick="resetVideoAnalysis()">🔄 分析新视频</button>
   </div>
-
   <div id="videoError" class="output" style="display:none;color:var(--red)"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 更新 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-updates">
+  <div class="panel-title">🔄 更新检查</div>
+  <div class="panel-desc">检查 OpenClaw 和龙虾保姆自身是否有新版本。</div>
+
+  <div class="card">
+    <div class="card-title">🔍 版本检查</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="checkUpdates()">🔄 检查更新</button>
+    </div>
+    <div class="progress-bar" id="updateProgress"><div class="fill" style="width:0%"></div></div>
+    <div class="output" id="updateOutput"></div>
+  </div>
+
+  <div id="updateResults" style="display:none">
+    <div class="card" id="openclawUpdateCard">
+      <div class="card-title">🦐 OpenClaw</div>
+      <div id="openclawUpdateInfo"></div>
+    </div>
+    <div class="card" id="selfUpdateCard">
+      <div class="card-title">🦐 龙虾保姆</div>
+      <div id="selfUpdateInfo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast">
+  <span id="toastMsg"></span>
+  <button class="close-toast" onclick="hideToast()">×</button>
+</div>
+
+<!-- ===== Copy Success Overlay ===== -->
+<div class="copy-success" id="copySuccess">
+  <div>✅ 诊断信息已复制到剪贴板</div>
+  <div style="font-size:13px;color:var(--text2);margin-top:8px">可粘贴发送给技术支持</div>
 </div>
 
 <!-- ===== JavaScript ===== -->
@@ -629,9 +939,21 @@ function switchTab(el, name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
-  else document.querySelector(`.tab:nth-child(${['home','install','feishu','model','skills','video','emergency','backup'].indexOf(name)+1})`)?.classList.add('active');
+  else {
+    const idx = ['home','install','feishu','model','skills','diagnostics','deploy','video','emergency','backup','updates'].indexOf(name);
+    if (idx >= 0) document.querySelectorAll('.tab')[idx]?.classList.add('active');
+  }
   document.getElementById('panel-' + name).classList.add('active');
 }
+
+// ===== Toast =====
+function showToast(msg, duration) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(hideToast, duration || 3000);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
 
 // ===== Status =====
 async function refreshStatus() {
@@ -655,7 +977,6 @@ async function refreshStatus() {
     document.getElementById('statusDot').className = 'status-dot ' + (allOk ? 'online' : 'offline');
     document.getElementById('statusText').textContent = allOk ? '一切正常' : '需要处理';
     
-    // 安装页环境
     const env = document.getElementById('installEnv');
     if (env) {
       env.innerHTML = Object.entries(c).map(([k,v]) => `${v?'✅':'❌'} ${k}: ${v?'正常':'缺失'}`).join('<br>');
@@ -663,6 +984,42 @@ async function refreshStatus() {
   } catch(e) {
     document.getElementById('statusText').textContent = '连接失败';
   }
+}
+
+// ===== Dashboard =====
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/dashboard');
+    const data = await res.json();
+    
+    // Services
+    const svc = document.getElementById('dashServices');
+    svc.innerHTML = `
+      <div class="dash-row"><span class="label">🔌 Gateway</span><span class="value ${data.services.gatewayOnline ? 'ok' : 'fail'}">${data.services.gatewayOnline ? '在线' : '离线'}</span></div>
+      <div class="dash-row"><span class="label">💬 飞书</span><span class="value ${data.services.feishuConfigured ? 'ok' : 'warn'}">${data.services.feishuConfigured ? '已配置' : '未配置'}</span></div>
+      <div class="dash-row"><span class="label">🤖 已配置模型</span><span class="value">${data.services.configuredModels.length > 0 ? data.services.configuredModels.join(', ') : '无'}</span></div>
+      <div class="dash-row"><span class="label">🧩 已安装技能</span><span class="value">${data.services.installedSkills} 个</span></div>
+    `;
+    
+    // System
+    const sys = document.getElementById('dashSystem');
+    sys.innerHTML = `
+      <div class="dash-row"><span class="label">💻 主机</span><span class="value">${data.system.hostname}</span></div>
+      <div class="dash-row"><span class="label">🧠 CPU</span><span class="value">${data.system.cpuCores} 核</span></div>
+      <div class="dash-row"><span class="label">💾 内存</span><span class="value ${parseFloat(data.system.memUsage) > 80 ? 'fail' : 'ok'}">${data.system.memUsage} (${data.system.memFree} 空闲)</span></div>
+      <div class="dash-row"><span class="label">💿 磁盘</span><span class="value">${data.system.diskFree} / ${data.system.diskTotal}</span></div>
+      <div class="dash-row"><span class="label">⏱ 运行时间</span><span class="value">${data.system.uptime}</span></div>
+    `;
+
+    // Onboarding banner
+    if (!data.onboardingComplete) {
+      document.getElementById('onboardingBanner').classList.add('show');
+    }
+  } catch(e) {}
+}
+
+function dismissOnboarding() {
+  document.getElementById('onboardingBanner').classList.remove('show');
 }
 
 // ===== 安装 OpenClaw =====
@@ -682,6 +1039,7 @@ async function installOpenclaw() {
   btn.disabled = false; btn.innerHTML = '📦 安装 / 更新 OpenClaw';
   setTimeout(() => { prog.classList.remove('show'); }, 2000);
   refreshStatus();
+  loadDashboard();
 }
 
 // ===== 修复 PowerShell =====
@@ -709,7 +1067,7 @@ async function testFeishu() {
 async function saveFeishu() {
   const appId = document.getElementById('feishuAppId').value;
   const secret = document.getElementById('feishuSecret').value;
-  if (!appId || !secret) { alert('请填写 App ID 和 App Secret'); return; }
+  if (!appId || !secret) { showToast('请填写 App ID 和 App Secret'); return; }
   
   const out = document.getElementById('feishuOutput');
   out.classList.add('show'); out.textContent = '⏳ 保存配置...';
@@ -720,7 +1078,7 @@ async function saveFeishu() {
   });
   const data = await res.json();
   out.textContent = data.message || data.error;
-  if (data.success) refreshStatus();
+  if (data.success) { refreshStatus(); loadDashboard(); showToast('✅ 飞书配置已保存'); }
 }
 
 // ===== 模型管家 =====
@@ -733,7 +1091,7 @@ async function saveModel() {
   const provider = document.getElementById('modelProvider').value;
   const apiKey = document.getElementById('modelApiKey').value;
   const baseUrl = document.getElementById('modelBaseUrl').value;
-  if (!apiKey) { alert('请输入 API Key'); return; }
+  if (!apiKey) { showToast('请输入 API Key'); return; }
   
   const out = document.getElementById('modelOutput');
   out.classList.add('show'); out.textContent = '⏳ 保存模型配置...';
@@ -744,6 +1102,7 @@ async function saveModel() {
   });
   const data = await res.json();
   out.textContent = data.message || data.error;
+  if (data.success) { loadDashboard(); showToast(`✅ ${provider} 配置已保存`); }
 }
 
 // ===== 技能商店 =====
@@ -754,7 +1113,7 @@ async function searchSkills() {
   
   const grid = document.getElementById('skillResults');
   if (!data.skills || data.skills.length === 0) {
-    grid.innerHTML = '<div style="color:var(--text2);font-size:13px">未找到相关技能</div>';
+    grid.innerHTML = '<div style="color:var(--text2);font-size:12px">未找到相关技能</div>';
     return;
   }
   
@@ -764,7 +1123,7 @@ async function searchSkills() {
       <div class="desc">${s.desc || s.slug}</div>
       <div class="footer">
         <span class="tag available">${s.slug}</span>
-        <button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('${s.slug}')">安装</button>
+        <button class="btn btn-outline btn-sm" onclick="installSkill('${s.slug}')">安装</button>
       </div>
     </div>
   `).join('');
@@ -781,6 +1140,214 @@ async function installSkill(slug) {
   });
   const data = await res.json();
   out.textContent = data.success ? `✅ ${slug} 安装成功!\n${data.output}` : `❌ ${data.error}`;
+  if (data.success) { loadDashboard(); showToast(`✅ ${slug} 安装成功`); }
+}
+
+// ===== 智能诊断 =====
+async function runDiagnostics() {
+  const healthRing = document.getElementById('healthRing');
+  const healthScore = document.getElementById('healthScore');
+  const healthLabel = document.getElementById('healthLabel');
+  const healthSummary = document.getElementById('healthSummary');
+  const resultDiv = document.getElementById('diagnosticsResult');
+  const issuesList = document.getElementById('issuesList');
+  const out = document.getElementById('diagnosticsOutput');
+
+  healthScore.textContent = '...';
+  healthLabel.textContent = '正在扫描...';
+  out.classList.add('show'); out.textContent = '⏳ 正在扫描系统...';
+  resultDiv.style.display = 'none';
+
+  const res = await fetch('/api/diagnostics');
+  const data = await res.json();
+
+  healthScore.textContent = data.healthScore;
+  const statusClass = data.status === 'healthy' ? 'healthy' : (data.status === 'fair' ? 'fair' : 'poor');
+  healthRing.className = 'health-ring ' + statusClass;
+  healthRing.style.setProperty('--pct', data.healthScore + '%');
+
+  const labels = { healthy: '🟢 系统健康', fair: '🟡 需要注意', poor: '🔴 需要修复' };
+  healthLabel.textContent = labels[data.status] || '未知';
+  healthSummary.textContent = `${data.summary.critical} 个严重 · ${data.summary.error} 个错误 · ${data.summary.warning} 个警告 · ${data.summary.info} 条提示`;
+
+  if (data.issues.length > 0) {
+    resultDiv.style.display = 'block';
+    issuesList.innerHTML = data.issues.map(i => `
+      <div class="issue-item ${i.severity}">
+        <span class="sev ${i.severity}">${i.severity.toUpperCase()}</span>
+        <div class="issue-body">
+          <div class="issue-title">${i.category}: ${i.title}</div>
+          <div class="issue-desc">${i.fix}</div>
+          ${i.autoFixable ? `<div class="issue-fix"><button class="btn btn-success btn-sm" onclick="autoFix('${i.fixEndpoint}')">🔧 自动修复</button></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  out.classList.remove('show');
+  showToast(`✅ 诊断完成 — 健康评分 ${data.healthScore}/100`);
+}
+
+async function autoFix(endpoint) {
+  const out = document.getElementById('diagnosticsOutput');
+  out.classList.add('show'); out.textContent = '⏳ 正在自动修复...';
+  
+  const res = await fetch('/api/diagnostics/fix', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ endpoint })
+  });
+  const data = await res.json();
+  out.textContent = data.output || data.error || '修复指令已发送';
+  if (data.success) showToast('✅ 修复完成，建议重新扫描');
+}
+
+// ===== 一键部署 =====
+document.getElementById('deployType')?.addEventListener('change', function() {
+  document.getElementById('domainGroup').style.display = this.value === 'nginx' ? 'block' : 'none';
+});
+
+async function generateDeployConfig() {
+  const type = document.getElementById('deployType').value;
+  const name = document.getElementById('deployName').value;
+  const port = document.getElementById('deployPort').value;
+  const domain = document.getElementById('deployDomain').value;
+  const out = document.getElementById('deployOutput');
+  const prog = document.getElementById('deployProgress');
+  const fileList = document.getElementById('deployFileList');
+  const filesDiv = document.getElementById('deployFiles');
+
+  out.classList.add('show'); out.textContent = '⏳ 正在生成配置...';
+  prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
+
+  const res = await fetch('/api/deploy/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, name, port: port || '18928', domain })
+  });
+  const data = await res.json();
+
+  prog.querySelector('.fill').style.width = '100%';
+
+  if (data.success && data.files) {
+    out.textContent = `✅ ${type} 配置已生成!\n共 ${Object.keys(data.files).length} 个文件`;
+    filesDiv.style.display = 'block';
+    
+    fileList.innerHTML = Object.entries(data.files).map(([filename, content]) => `
+      <div class="deploy-file">
+        <div class="file-header" onclick="toggleFileBody(this)">
+          📄 ${filename}
+          <span style="font-size:11px;color:var(--text2)">点击展开</span>
+        </div>
+        <div class="file-body">${escapeHtml(content)}</div>
+      </div>
+    `).join('');
+    
+    showToast(`✅ 已生成 ${Object.keys(data.files).length} 个文件`);
+  } else {
+    out.textContent = '❌ ' + (data.error || '生成失败');
+  }
+
+  setTimeout(() => { prog.classList.remove('show'); }, 2000);
+}
+
+function toggleFileBody(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('show');
+  header.querySelector('span').textContent = body.classList.contains('show') ? '点击收起' : '点击展开';
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== 反馈 - 复制诊断信息 =====
+async function copyDiagnostics() {
+  try {
+    const res = await fetch('/api/diagnostics/copy');
+    const data = await res.json();
+    
+    if (data.success && data.info) {
+      await navigator.clipboard.writeText(data.info);
+      const overlay = document.getElementById('copySuccess');
+      overlay.classList.add('show');
+      setTimeout(() => overlay.classList.remove('show'), 2000);
+      showToast('✅ 诊断信息已复制 (' + data.lines + ' 行)');
+    } else {
+      showToast('❌ 生成诊断信息失败');
+    }
+  } catch(e) {
+    // Fallback: copy system basic info
+    const basic = `🦐 龙虾保姆 v2.0\n时间: ${new Date().toLocaleString()}\n系统: ${navigator.platform}\nUser-Agent: ${navigator.userAgent}`;
+    await navigator.clipboard.writeText(basic);
+    showToast('✅ 基本信息已复制');
+  }
+}
+
+// ===== 更新检查 =====
+async function checkUpdates() {
+  const out = document.getElementById('updateOutput');
+  const prog = document.getElementById('updateProgress');
+  const resultsDiv = document.getElementById('updateResults');
+  const ocInfo = document.getElementById('openclawUpdateInfo');
+  const selfInfo = document.getElementById('selfUpdateInfo');
+
+  out.classList.add('show'); out.textContent = '⏳ 正在检查更新...';
+  prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
+  resultsDiv.style.display = 'none';
+
+  const res = await fetch('/api/update/check');
+  const data = await res.json();
+
+  prog.querySelector('.fill').style.width = '100%';
+  resultsDiv.style.display = 'block';
+
+  // OpenClaw
+  if (data.openclaw) {
+    if (data.openclaw.hasUpdate) {
+      ocInfo.innerHTML = `
+        <div class="update-card">
+          <div class="update-icon">📦</div>
+          <div class="update-text">
+            <h4>有新版本可用!</h4>
+            <p>当前: ${data.openclaw.installed} → 最新: ${data.openclaw.latest}</p>
+            <button class="btn btn-primary btn-sm" onclick="installOpenclaw()">📦 立即更新</button>
+          </div>
+        </div>
+      `;
+    } else {
+      ocInfo.innerHTML = `
+        <div style="font-size:13px;color:var(--text2)">
+          ✅ 已是最新版本: <b>${data.openclaw.installed}</b>
+        </div>
+      `;
+    }
+  }
+
+  // 龙虾保姆自更新
+  if (data.self.updateAvailable) {
+    selfInfo.innerHTML = `
+      <div class="update-card">
+        <div class="update-icon">🦐</div>
+        <div class="update-text">
+          <h4>龙虾保姆 新版本: ${data.self.update.version}</h4>
+          <p>当前版本: v${data.self.currentVersion}</p>
+          <p style="margin-top:4px;font-size:11px;color:var(--text2)">${(data.self.update.notes || '').substring(0, 200)}</p>
+          <a href="${data.self.update.url}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none;display:inline-flex;margin-top:6px">📥 查看发布页</a>
+        </div>
+      </div>
+    `;
+    document.getElementById('updateBadge').style.display = 'inline';
+  } else {
+    selfInfo.innerHTML = `
+      <div style="font-size:13px;color:var(--text2)">
+        ✅ 龙虾保姆 v${data.self.currentVersion} 已是最新
+      </div>
+    `;
+  }
+
+  out.textContent = `✅ 检查完成`;
+  setTimeout(() => { prog.classList.remove('show'); }, 2000);
 }
 
 // ===== 急诊中心 =====
@@ -802,6 +1369,7 @@ async function emergencyRestore() {
   
   btn.disabled = false; btn.innerHTML = '🚨 一键抢救';
   setTimeout(() => { prog.querySelector('.fill').style.width = '0%'; }, 3000);
+  showToast(data.message);
 }
 
 // ===== 备份医生 =====
@@ -820,6 +1388,7 @@ async function createBackup() {
   if (data.success) {
     out.textContent = `✅ 备份成功！已保存 ${data.count} 项文件\n📁 ${data.backupPath}`;
     listBackups();
+    showToast(`✅ 备份成功 (${data.count} 项)`);
   } else {
     out.textContent = '❌ 备份失败';
   }
@@ -833,7 +1402,7 @@ async function listBackups() {
     const data = await res.json();
     const list = document.getElementById('backupHistory');
     if (!data.backups || data.backups.length === 0) {
-      list.innerHTML = '<div style="color:var(--text2);font-size:13px">暂无备份</div>';
+      list.innerHTML = '<div style="color:var(--text2);font-size:12px">暂无备份</div>';
       return;
     }
     list.innerHTML = data.backups.map(b => {
@@ -842,10 +1411,9 @@ async function listBackups() {
       return `<div class="backup-item"><span>📁 ${b.name}</span><span class="time">${time} · ${size}</span></div>`;
     }).join('');
     
-    // 同时也更新急诊中心的备份记录
     const bl = document.getElementById('backupList');
     if (bl && data.backups.length > 0) {
-      bl.innerHTML = data.backups.slice(0, 3).map(b => 
+      bl.innerHTML = data.backups.slice(0, 3).map(b =>
         `📁 ${b.name} — ${new Date(b.time).toLocaleString('zh-CN')}`
       ).join('<br>');
     }
@@ -858,44 +1426,36 @@ let videoTaskId = null;
 let videoPollTimer = null;
 
 function handleDragOver(e) {
-  e.preventDefault();
-  e.stopPropagation();
+  e.preventDefault(); e.stopPropagation();
   document.getElementById('videoDropZone').style.borderColor = 'var(--accent)';
   document.getElementById('videoDropZone').style.background = 'rgba(255,123,43,0.05)';
 }
-
 function handleDragLeave(e) {
-  e.preventDefault();
-  e.stopPropagation();
+  e.preventDefault(); e.stopPropagation();
   document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
   document.getElementById('videoDropZone').style.background = 'transparent';
 }
-
 function handleDrop(e) {
-  e.preventDefault();
-  e.stopPropagation();
+  e.preventDefault(); e.stopPropagation();
   document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
   document.getElementById('videoDropZone').style.background = 'transparent';
   const files = e.dataTransfer.files;
   if (files.length > 0) setVideoFile(files[0]);
 }
-
 function handleFileSelect(e) {
   if (e.target.files.length > 0) setVideoFile(e.target.files[0]);
 }
-
 function setVideoFile(file) {
   const validTypes = ['.mp4', '.avi', '.mov', '.mkv', '.webm'];
   const ext = '.' + file.name.split('.').pop().toLowerCase();
   if (!validTypes.includes(ext)) {
-    alert('不支持的文件格式，请使用: ' + validTypes.join(', '));
+    showToast('不支持的文件格式，请使用: ' + validTypes.join(', '));
     return;
   }
   selectedVideoFile = file;
   const size = (file.size / (1024 * 1024)).toFixed(1);
   document.getElementById('videoFileInfo').style.display = 'block';
   document.getElementById('videoFileInfo').innerHTML = `✅ 已选择: <b>${file.name}</b> (${size} MB)`;
-  document.getElementById('videoDropZone').querySelector('div:first-child').textContent = '📁';
   document.getElementById('videoFilePath').value = '';
 }
 
@@ -910,16 +1470,14 @@ async function startVideoAnalysis() {
 
   errorDiv.style.display = 'none';
   resultDiv.style.display = 'none';
-
   const visionModel = document.getElementById('visionModel').value;
 
   if (!selectedVideoFile && !filePath) {
-    alert('请先选择视频文件或输入文件路径');
+    showToast('请先选择视频文件或输入文件路径');
     return;
   }
 
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> 分析中...';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 分析中...';
   progressDiv.style.display = 'block';
   progressBar.style.width = '5%';
   progressMsg.textContent = '正在提交任务...';
@@ -971,19 +1529,15 @@ function startVideoPolling(taskId) {
       const data = await res.json();
 
       if (data.success && data.status === 'done' && data.result) {
-        clearInterval(videoPollTimer);
-        videoPollTimer = null;
+        clearInterval(videoPollTimer); videoPollTimer = null;
         displayVideoResult(data.result);
         return;
       }
-
       if (!data.success && data.status === 'error') {
-        clearInterval(videoPollTimer);
-        videoPollTimer = null;
+        clearInterval(videoPollTimer); videoPollTimer = null;
         showVideoError(data.error || '分析失败');
         return;
       }
-
       if (data.success) {
         progressBar.style.width = (data.progress || 0) + '%';
         progressMsg.textContent = data.message || '处理中...';
@@ -992,8 +1546,7 @@ function startVideoPolling(taskId) {
     } catch(e) {
       stuckCount++;
       if (stuckCount > 30) {
-        clearInterval(videoPollTimer);
-        videoPollTimer = null;
+        clearInterval(videoPollTimer); videoPollTimer = null;
         showVideoError('连接超时，请重试');
       }
     }
@@ -1002,9 +1555,7 @@ function startVideoPolling(taskId) {
 
 function displayVideoResult(result) {
   const btn = document.getElementById('videoAnalyzeBtn');
-  btn.disabled = false;
-  btn.innerHTML = '🚀 开始分析';
-
+  btn.disabled = false; btn.innerHTML = '🚀 开始分析';
   document.getElementById('videoProgress').style.display = 'none';
   document.getElementById('videoResult').style.display = 'block';
   document.getElementById('videoError').style.display = 'none';
@@ -1017,57 +1568,45 @@ function displayVideoResult(result) {
     <div>🎞 编码: <b>${info.codec || '-'}</b></div>
     <div>📦 格式: <b>${info.format || '-'}</b></div>
   `;
-
   const analysisDiv = document.getElementById('videoAnalysis');
-  if (result.analysis) {
-    analysisDiv.textContent = result.analysis;
-  } else {
-    analysisDiv.textContent = 'AI 分析结果为空';
-  }
+  analysisDiv.textContent = result.analysis || 'AI 分析结果为空';
 
   if (result.segments && result.segments.length > 0) {
     const segmentsCard = document.getElementById('videoSegmentsCard');
     const segmentsDiv = document.getElementById('videoSegments');
     segmentsCard.style.display = 'block';
     segmentsDiv.innerHTML = result.segments.map((seg, i) => `
-      <div style="background:var(--bg3);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px">
-        <span style="background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${i + 1}</span>
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px">
+        <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i + 1}</span>
         <span style="font-weight:600;color:var(--accent2);font-family:monospace">${seg.timestamp}</span>
-        <span style="color:var(--text2)">关键场景 ${i + 1}</span>
       </div>
     `).join('');
   }
+  showToast('✅ 视频分析完成');
 }
 
 function showVideoError(msg) {
   const btn = document.getElementById('videoAnalyzeBtn');
-  btn.disabled = false;
-  btn.innerHTML = '🚀 开始分析';
-
+  btn.disabled = false; btn.innerHTML = '🚀 开始分析';
   document.getElementById('videoProgress').style.display = 'none';
   document.getElementById('videoResult').style.display = 'none';
-
-  const errorDiv = document.getElementById('videoError');
-  errorDiv.style.display = 'block';
-  errorDiv.textContent = '❌ ' + msg;
+  document.getElementById('videoError').style.display = 'block';
+  document.getElementById('videoError').textContent = '❌ ' + msg;
 }
 
 function resetVideoAnalysis() {
-  selectedVideoFile = null;
-  videoTaskId = null;
+  selectedVideoFile = null; videoTaskId = null;
   if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
-
   document.getElementById('videoResult').style.display = 'none';
   document.getElementById('videoError').style.display = 'none';
-  document.getElementById('videoProgress').style.display = 'none';
   document.getElementById('videoFileInfo').style.display = 'none';
   document.getElementById('videoFilePath').value = '';
-  document.getElementById('videoDropZone').querySelector('div:first-child').textContent = '🎬';
   document.getElementById('videoFileInput').value = '';
 }
 
-// ===== 初始化 =====
+// ===== Initialize =====
 refreshStatus();
+loadDashboard();
 listBackups();
 </script>
 </body>

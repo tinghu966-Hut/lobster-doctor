@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title 🦐 龙虾医生
+title 🦐 龙虾保姆 v2.0
 
 echo.
-echo  🦐 龙虾医生 — OpenClaw 中文伴侣
+echo  🦐 龙虾保姆 — OpenClaw 一条龙服务伴侣 v2.0
 echo  ─────────────────────────────
 echo.
 
@@ -27,7 +27,7 @@ if not exist "node_modules\" (
 )
 
 :: 启动
-echo 🚀 启动龙虾医生...
+echo 🚀 启动龙虾保姆...
 echo.
 start http://127.0.0.1:18928
 node main.js

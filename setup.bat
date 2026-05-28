@@ -1,12 +1,12 @@
 @echo off
 chcp 65001 >nul
-title 🦐 龙虾医生 - 安装向导
+title 🦐 龙虾保姆 v2.0 - 安装向导
 color 0B
 
 echo.
 echo  ============================================
-echo       🦐 龙虾医生 v1.0 — 安装向导
-echo       OpenClaw 中文伴侣
+echo       🦐 龙虾保姆 v2.0 — 安装向导
+echo       OpenClaw 一条龙服务伴侣
 echo  ============================================
 echo.
 echo  本工具将帮助您：
@@ -42,10 +42,10 @@ set DESKTOP=%USERPROFILE%\Desktop
 set VBS=%TEMP%\mklnk.vbs
 (
 echo Set WshShell = WScript.CreateObject("WScript.Shell"^)
-echo Set lnk = WshShell.CreateShortcut("%DESKTOP%\🦐 龙虾医生.lnk"^)
+echo Set lnk = WshShell.CreateShortcut("%DESKTOP%\🦐 龙虾保姆.lnk"^)
 echo lnk.TargetPath = "%SCRIPT_DIR%run.bat"
 echo lnk.WorkingDirectory = "%SCRIPT_DIR%"
-echo lnk.Description = "🦐 龙虾医生 — OpenClaw 中文伴侣"
+echo lnk.Description = "🦐 龙虾保姆 — OpenClaw 一条龙服务伴侣"
 echo lnk.IconLocation = "%SystemRoot%\system32\SHELL32.dll,242"
 echo lnk.Save
 ) > "%VBS%"
@@ -62,9 +62,9 @@ echo ✅ 依赖安装完成
 echo.
 
 :: 启动
-echo 🚀 启动龙虾医生...
+echo 🚀 启动龙虾保姆...
 echo.
-echo   桌面快捷方式已创建：🦐 龙虾医生
+echo   桌面快捷方式已创建：🦐 龙虾保姆
 echo   双击即可打开本工具
 echo.
 start http://127.0.0.1:18928

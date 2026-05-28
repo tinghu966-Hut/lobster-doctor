@@ -1,18 +1,18 @@
 @echo off
 chcp 65001 >nul
-title 🦐 龙虾医生 — 安装程序
+title 🦐 龙虾保姆 v2.0 — 安装程序
 color 0B
 
 echo.
 echo  ============================================
-echo       🦐 龙虾医生 v1.0
-echo       OpenClaw 中文伴侣工具
+echo       🦐 龙虾保姆 v2.0
+echo       OpenClaw 一条龙服务伴侣
 echo  ============================================
 echo.
-echo  欢迎使用龙虾医生！本工具将帮助您：
+echo  欢迎使用龙虾保姆！本工具将帮助您：
 echo    1. 检测系统环境
 echo    2. 创建桌面快捷方式
-echo    3. 快速启动龙虾医生
+echo    3. 快速启动龙虾保姆
 echo.
 echo  按任意键继续安装...
 pause >nul
@@ -68,31 +68,31 @@ echo 📌 [3/4] 创建桌面快捷方式...
 set VBS=%TEMP%\lobster_lnk.vbs
 (
     echo Set WshShell = WScript.CreateObject("WScript.Shell"^)
-    echo Set lnk = WshShell.CreateShortcut("%DESKTOP%\🦐 龙虾医生.lnk"^)
+    echo Set lnk = WshShell.CreateShortcut("%DESKTOP%\🦐 龙虾保姆.lnk"^)
     echo lnk.TargetPath = "%APP_PATH%"
     echo lnk.WorkingDirectory = "%SCRIPT_DIR%dist"
-    echo lnk.Description = "🦐 龙虾医生 — OpenClaw 中文伴侣工具"
+    echo lnk.Description = "🦐 龙虾保姆 — OpenClaw 一条龙服务伴侣"
     echo lnk.IconLocation = "%APP_PATH%,0"
     echo lnk.Save
 ) > "%VBS%"
 cscript //nologo "%VBS%" >nul 2>&1
 del "%VBS%" >nul 2>&1
-echo ✅ 桌面快捷方式已创建：🦐 龙虾医生
+echo ✅ 桌面快捷方式已创建：🦐 龙虾保姆
 echo.
 
 :: Step 4: Done
 echo 🚀 [4/4] 安装完成！
 echo.
 echo ┌──────────────────────────────────────┐
-echo │  ✅ 龙虾医生安装成功！                 │
+echo │  ✅ 龙虾保姆安装成功！                 │
 echo │                                        │
 echo │  双击桌面图标即可启动：                │
-echo │  🦐 龙虾医生                           │
+echo │  🦐 龙虾保姆                           │
 echo │                                        │
 echo │  如有问题，请查阅 README.txt           │
 echo └──────────────────────────────────────┘
 echo.
-echo  按任意键启动龙虾医生...
+echo  按任意键启动龙虾保姆...
 pause >nul
 
 :: Launch the app
