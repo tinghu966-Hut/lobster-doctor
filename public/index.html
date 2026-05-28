@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦐 龙虾医生 — OpenClaw 中文伴侣</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #ff7b2b;
+    --accent2: #ff9c4a;
+    --green: #3fb950;
+    --red: #f85149;
+    --blue: #58a6ff;
+    --gold: #d29922;
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  
+  /* ===== Header ===== */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 15px; }
+  .logo { font-size: 36px; }
+  .title { font-size: 22px; font-weight: 700; color: var(--accent2); }
+  .subtitle { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 15px; }
+  .status-dot {
+    display: inline-block; width: 10px; height: 10px;
+    border-radius: 50%; margin-right: 6px;
+  }
+  .status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .status-text { font-size: 13px; color: var(--text2); }
+
+  /* ===== Tabs ===== */
+  .tabs {
+    display: flex;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    overflow-x: auto;
+    gap: 2px;
+  }
+  .tab {
+    padding: 14px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text2);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .tab.active {
+    color: var(--accent2);
+    border-bottom-color: var(--accent2);
+    font-weight: 600;
+  }
+  .tab .badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  /* ===== Panels ===== */
+  .panel { display: none; padding: 30px; max-width: 960px; margin: 0 auto; }
+  .panel.active { display: block; }
+  .panel-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .panel-desc { color: var(--text2); margin-bottom: 25px; font-size: 14px; line-height: 1.7; }
+
+  /* ===== Cards ===== */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+  /* ===== System Status ===== */
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .status-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px;
+    text-align: center;
+  }
+  .status-item .icon { font-size: 28px; margin-bottom: 6px; }
+  .status-item .name { font-size: 12px; color: var(--text2); }
+  .status-item .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .status-item .value.ok { color: var(--green); }
+  .status-item .value.fail { color: var(--red); }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #e06b20); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, var(--green), #2ea043); color: #fff; }
+  .btn-danger { background: linear-gradient(135deg, var(--red), #d03533); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+  .btn-lg { padding: 14px 36px; font-size: 18px; }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+
+  .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+
+  /* ===== Form ===== */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-hint { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* ===== Output ===== */
+  .output {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: #7ee787;
+    display: none;
+    margin-top: 12px;
+  }
+  .output.show { display: block; }
+
+  /* ===== Loading ===== */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--text2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Skill Grid ===== */
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .skill-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: border 0.2s;
+  }
+  .skill-card:hover { border-color: var(--accent); }
+  .skill-card .name { font-weight: 600; font-size: 14px; }
+  .skill-card .desc { font-size: 12px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+  .skill-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .skill-card .tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .skill-card .tag.installed { background: rgba(63,185,80,0.15); color: var(--green); }
+  .skill-card .tag.available { background: rgba(88,166,255,0.15); color: var(--blue); }
+
+  /* ===== Backup List ===== */
+  .backup-list { margin-top: 12px; }
+  .backup-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: var(--bg3); border-radius: var(--radius);
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .backup-item .time { color: var(--text2); font-size: 12px; }
+
+  /* ===== Emergency ===== */
+  .emergency-hero {
+    text-align: center; padding: 40px 20px;
+    background: linear-gradient(135deg, rgba(248,81,73,0.1), rgba(255,123,43,0.1));
+    border: 1px solid rgba(248,81,73,0.3);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+  }
+  .emergency-hero h2 { font-size: 32px; margin-bottom: 10px; }
+  .emergency-hero p { color: var(--text2); margin-bottom: 20px; }
+
+  /* ===== Progress ===== */
+  .progress-bar {
+    height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin: 12px 0; display: none;
+  }
+  .progress-bar.show { display: block; }
+  .progress-bar .fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 2px; transition: width 0.5s;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 768px) {
+    .header { padding: 15px; flex-wrap: wrap; gap: 10px; }
+    .tabs { padding: 0 10px; }
+    .tab { padding: 12px 14px; font-size: 13px; }
+    .panel { padding: 20px 15px; }
+    .form-row { grid-template-columns: 1fr; }
+    .status-grid { grid-template-columns: repeat(3, 1fr); }
+    .skill-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Header ===== -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🦐</div>
+    <div>
+      <div class="title">龙虾医生</div>
+      <div class="subtitle">OpenClaw 中文伴侣 · 安装 / 配置 / 急救</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div>
+      <span class="status-dot online" id="statusDot"></span>
+      <span class="status-text" id="statusText">检测中...</span>
+    </div>
+    <button class="btn btn-outline" onclick="refreshStatus()" style="padding:6px 12px;font-size:12px">🔄 刷新</button>
+    <span class="version" style="font-size:12px;color:var(--text2)">v1.0</span>
+  </div>
+</div>
+
+<!-- ===== Tabs ===== -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(this, 'home')">
+    <span>🏠</span> 仪表盘
+  </div>
+  <div class="tab" onclick="switchTab(this, 'install')">
+    <span>🚀</span> 智能安装
+  </div>
+  <div class="tab" onclick="switchTab(this, 'feishu')">
+    <span>💬</span> 飞书助手
+  </div>
+  <div class="tab" onclick="switchTab(this, 'model')">
+    <span>🤖</span> 模型管家
+  </div>
+  <div class="tab" onclick="switchTab(this, 'skills')">
+    <span>🧩</span> 技能商店 <span class="badge">NEW</span>
+  </div>
+  <div class="tab" onclick="switchTab(this, 'emergency')">
+    <span>🚑</span> 急诊中心
+  </div>
+  <div class="tab" onclick="switchTab(this, 'backup')">
+    <span>📦</span> 备份医生
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 仪表盘 -->
+<!-- ============================================================ -->
+<div class="panel active" id="panel-home">
+  <div class="panel-title">🏠 仪表盘</div>
+  <div class="panel-desc">系统状态一览。绿色=就绪，红色=需要处理。</div>
+  <div class="status-grid" id="statusGrid">
+    <div class="status-item"><div class="icon">🟢</div><div class="name">Node.js</div><div class="value" id="s-node">...</div></div>
+    <div class="status-item"><div class="icon">🦐</div><div class="name">OpenClaw</div><div class="value" id="s-openclaw">...</div></div>
+    <div class="status-item"><div class="icon">🎬</div><div class="name">FFmpeg</div><div class="value" id="s-ffmpeg">...</div></div>
+    <div class="status-item"><div class="icon">🔧</div><div class="name">Git</div><div class="value" id="s-git">...</div></div>
+    <div class="status-item"><div class="icon">📂</div><div class="name">工作区</div><div class="value" id="s-workspace">...</div></div>
+    <div class="status-item"><div class="icon">🔌</div><div class="name">Gateway</div><div class="value" id="s-gateway">...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 快速操作</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="switchTab(undefined, 'install')">🚀 安装 OpenClaw</button>
+      <button class="btn btn-success" onclick="switchTab(undefined, 'feishu')">💬 配置飞书</button>
+      <button class="btn btn-danger" onclick="switchTab(undefined, 'emergency')">🚑 一键急救</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 关于龙虾医生</div>
+    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+      龙虾医生是为中国 OpenClaw 用户打造的一站式伴侣工具。<br>
+      解决新手安装难、配置复杂、崩溃不知咋办等痛点。<br><br>
+      <b>六大模块：</b>智能安装 · 飞书助手 · 模型管家 · 技能商店 · 急诊中心 · 备份医生
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 智能安装 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-install">
+  <div class="panel-title">🚀 智能安装</div>
+  <div class="panel-desc">自动检测环境、安装 OpenClaw、修复常见问题。</div>
+
+  <div class="card">
+    <div class="card-title">🔍 环境检测</div>
+    <button class="btn btn-outline" onclick="refreshStatus()">🔄 重新检测</button>
+    <div id="installEnv" style="margin-top:12px;font-size:13px;color:var(--text2)"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🛠️ 一键安装 / 修复</div>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-lg" onclick="installOpenclaw()">📦 安装 / 更新 OpenClaw</button>
+      <button class="btn btn-outline" onclick="fixPowershell()">🔧 修复 PowerShell</button>
+    </div>
+    <div class="progress-bar" id="installProgress"><div class="fill" style="width:0%"></div></div>
+    <div class="output" id="installOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 安装说明</div>
+    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+      1. 本工具会自动检测你的系统环境<br>
+      2. 如果 Node.js 未安装，请先<a href="https://nodejs.org" target="_blank" style="color:var(--blue)">去官网下载 Node.js</a><br>
+      3. 点击上方按钮自动安装 OpenClaw<br>
+      4. 安装完成后配置飞书和模型即可使用
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 飞书助手 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-feishu">
+  <div class="panel-title">💬 飞书助手</div>
+  <div class="panel-desc">可视化配置飞书机器人连接，无需手动编辑 JSON 文件。</div>
+
+  <div class="card">
+    <div class="card-title">📝 飞书配置</div>
+    <div class="form-group">
+      <label>App ID</label>
+      <input type="text" id="feishuAppId" placeholder="cli_xxxxxxxxxxxxxxxxx">
+      <div class="form-hint">在 飞书开放平台 → 应用 → 凭证与基础信息 中获取</div>
+    </div>
+    <div class="form-group">
+      <label>App Secret</label>
+      <input type="password" id="feishuSecret" placeholder="输入 App Secret">
+      <div class="form-hint">同一页面下方的 App Secret</div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="testFeishu()">🔌 测试连接</button>
+      <button class="btn btn-primary" onclick="saveFeishu()">💾 保存配置</button>
+    </div>
+    <div class="output" id="feishuOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📖 获取方法</div>
+    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+      1. 打开 <a href="https://open.feishu.cn" target="_blank" style="color:var(--blue)">飞书开放平台</a><br>
+      2. 创建企业自建应用 → 填写应用名称<br>
+      3. 在"凭证与基础信息"中获取 App ID 和 App Secret<br>
+      4. 在"权限管理"中添加需要的权限<br>
+      5. 发布应用 → 等待审核通过
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 模型管家 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-model">
+  <div class="panel-title">🤖 模型管家</div>
+  <div class="panel-desc">一键配置 AI 模型 API Key，支持 DeepSeek、阿里云、OpenAI。</div>
+
+  <div class="card">
+    <div class="card-title">🔑 API Key 配置</div>
+    <div class="form-group">
+      <label>选择模型供应商</label>
+      <select id="modelProvider">
+        <option value="deepseek">DeepSeek（国内可用，推荐）</option>
+        <option value="aliyun">阿里云通义千问（国内可用）</option>
+        <option value="openai">OpenAI（需海外支付方式）</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="modelApiKey" placeholder="sk-...">
+    </div>
+    <div class="form-group" id="modelBaseUrlGroup">
+      <label>API 地址（可选，一般不用改）</label>
+      <input type="text" id="modelBaseUrl" placeholder="留空使用默认地址">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveModel()">💾 保存配置</button>
+    </div>
+    <div class="output" id="modelOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 推荐</div>
+    <p style="font-size:13px;line-height:1.8;color:var(--text2)">
+      <b>DeepSeek</b> — 国内直接访问，性价比高，适合新手<br>
+      <b>阿里云通义千问</b> — 国内直接访问，有免费额度<br>
+      <b>OpenAI</b> — 需要海外信用卡，访问需要代理
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 技能商店 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-skills">
+  <div class="panel-title">🧩 技能商店</div>
+  <div class="panel-desc">搜索和安装 OpenClaw 技能（Skills），一键扩展能力。</div>
+
+  <div class="card">
+    <div class="card-title">🔍 搜索技能</div>
+    <div class="form-group">
+      <input type="text" id="skillSearch" placeholder="搜索技能名称，如 self-improving、github、deploy" onkeydown="if(event.key==='Enter') searchSkills()">
+    </div>
+    <button class="btn btn-outline" onclick="searchSkills()">🔍 搜索</button>
+    <div class="output" id="skillSearchOutput"></div>
+    
+    <div class="skill-grid" id="skillResults" style="margin-top:15px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 推荐技能</div>
+    <div class="skill-grid">
+      <div class="skill-card">
+        <div class="name">🦐 自改进</div>
+        <div class="desc">自动记录错误和学习，持续优化表现</div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('self-improving-agent')">安装</button></div>
+      </div>
+      <div class="skill-card">
+        <div class="name">🐙 GitHub</div>
+        <div class="desc">GitHub 全套操作：Issue、PR、CI 日志</div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('github')">安装</button></div>
+      </div>
+      <div class="skill-card">
+        <div class="name">🚀 部署助手</div>
+        <div class="desc">一键生成 Docker、Nginx、CI/CD 配置</div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('deploy-helper')">安装</button></div>
+      </div>
+      <div class="skill-card">
+        <div class="name">🔍 Tavily 搜索</div>
+        <div class="desc">联网搜索能力，实时获取信息</div>
+        <div class="footer"><span class="tag available">必备</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('tavily')">安装</button></div>
+      </div>
+      <div class="skill-card">
+        <div class="name">🧪 任务流</div>
+        <div class="desc">多步骤复杂任务编排，自动执行</div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('taskflow')">安装</button></div>
+      </div>
+      <div class="skill-card">
+        <div class="name">🧩 技能工坊</div>
+        <div class="desc">自己动手创建和编辑技能</div>
+        <div class="footer"><span class="tag available">推荐</span><button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('skill-creator')">安装</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 急诊中心 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-emergency">
+  <div class="panel-title">🚑 急诊中心</div>
+  <div class="panel-desc">当龙虾认不出你、崩溃、或对话框异常时使用。</div>
+
+  <div class="emergency-hero">
+    <h2>🦐 → 💀 → 🦐</h2>
+    <p>一键恢复身份、记忆、重启连接</p>
+    <button class="btn btn-danger btn-lg" onclick="emergencyRestore()" id="emergencyBtn" style="font-size:22px;padding:20px 50px">
+      🚨 一键抢救
+    </button>
+    <div style="margin-top:12px;font-size:13px;color:var(--text2)">
+      点此按钮 → 自动备份当前状态 → 恢复身份文件 → 重启 Gateway
+    </div>
+  </div>
+
+  <div class="progress-bar show" id="emergencyProgress"><div class="fill" style="width:0%"></div></div>
+  <div class="output" id="emergencyOutput"></div>
+
+  <div class="card">
+    <div class="card-title">📋 抢救记录</div>
+    <div id="backupList" style="font-size:13px;color:var(--text2)">暂无记录</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PANEL: 备份医生 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-backup">
+  <div class="panel-title">📦 备份医生</div>
+  <div class="panel-desc">定时备份关键文件，防止数据丢失。建议每周至少备份一次。</div>
+
+  <div class="card">
+    <div class="card-title">📤 创建备份</div>
+    <button class="btn btn-primary btn-lg" onclick="createBackup()">📦 立即备份</button>
+    <div class="progress-bar" id="backupProgress"><div class="fill" style="width:0%"></div></div>
+    <div class="output" id="backupOutput"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📚 备份历史</div>
+    <div class="backup-list" id="backupHistory">
+      <div style="color:var(--text2);font-size:13px">加载中...</div>
+    </div>
+    <button class="btn btn-outline" onclick="listBackups()" style="margin-top:10px">🔄 刷新列表</button>
+  </div>
+</div>
+
+<!-- ===== JavaScript ===== -->
+<script>
+// ===== Tab switching =====
+function switchTab(el, name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelector(`.tab:nth-child(${['home','install','feishu','model','skills','emergency','backup'].indexOf(name)+1})`)?.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ===== Status =====
+async function refreshStatus() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    const c = data.checks;
+    
+    const map = (id, ok) => {
+      document.getElementById(id).innerHTML = ok ? '✅ 正常' : '❌ 缺失';
+      document.getElementById(id).className = 'value ' + (ok ? 'ok' : 'fail');
+    };
+    map('s-node', c.node);
+    map('s-openclaw', c.openclaw);
+    map('s-ffmpeg', c.ffmpeg);
+    map('s-git', c.git);
+    map('s-workspace', c.workspace);
+    map('s-gateway', c.gateway);
+    
+    const allOk = Object.values(c).every(v => v);
+    document.getElementById('statusDot').className = 'status-dot ' + (allOk ? 'online' : 'offline');
+    document.getElementById('statusText').textContent = allOk ? '一切正常' : '需要处理';
+    
+    // 安装页环境
+    const env = document.getElementById('installEnv');
+    if (env) {
+      env.innerHTML = Object.entries(c).map(([k,v]) => `${v?'✅':'❌'} ${k}: ${v?'正常':'缺失'}`).join('<br>');
+    }
+  } catch(e) {
+    document.getElementById('statusText').textContent = '连接失败';
+  }
+}
+
+// ===== 安装 OpenClaw =====
+async function installOpenclaw() {
+  const btn = event.target;
+  const out = document.getElementById('installOutput');
+  const prog = document.getElementById('installProgress');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 安装中...';
+  out.classList.add('show'); out.textContent = '⏳ 正在安装 OpenClaw...';
+  prog.classList.add('show'); prog.querySelector('.fill').style.width = '30%';
+  
+  const res = await fetch('/api/install/openclaw', { method: 'POST' });
+  const data = await res.json();
+  
+  prog.querySelector('.fill').style.width = '100%';
+  out.textContent = data.output;
+  btn.disabled = false; btn.innerHTML = '📦 安装 / 更新 OpenClaw';
+  setTimeout(() => { prog.classList.remove('show'); }, 2000);
+  refreshStatus();
+}
+
+// ===== 修复 PowerShell =====
+async function fixPowershell() {
+  const out = document.getElementById('installOutput');
+  out.classList.add('show'); out.textContent = '🔧 正在修复 PowerShell 执行策略...';
+  const res = await fetch('/api/fix/powershell', { method: 'POST' });
+  const data = await res.json();
+  out.textContent = data.success ? '✅ PowerShell 执行策略已修复' : '❌ 修复失败: ' + data.error;
+}
+
+// ===== 飞书 =====
+async function testFeishu() {
+  const out = document.getElementById('feishuOutput');
+  out.classList.add('show'); out.textContent = '⏳ 测试连接中...';
+  const res = await fetch('/api/test/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appId: document.getElementById('feishuAppId').value, appSecret: document.getElementById('feishuSecret').value })
+  });
+  const data = await res.json();
+  out.textContent = data.output;
+}
+
+async function saveFeishu() {
+  const appId = document.getElementById('feishuAppId').value;
+  const secret = document.getElementById('feishuSecret').value;
+  if (!appId || !secret) { alert('请填写 App ID 和 App Secret'); return; }
+  
+  const out = document.getElementById('feishuOutput');
+  out.classList.add('show'); out.textContent = '⏳ 保存配置...';
+  const res = await fetch('/api/config/feishu', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appId, appSecret: secret })
+  });
+  const data = await res.json();
+  out.textContent = data.message || data.error;
+  if (data.success) refreshStatus();
+}
+
+// ===== 模型管家 =====
+document.getElementById('modelProvider')?.addEventListener('change', function() {
+  const urls = { deepseek: 'https://api.deepseek.com', aliyun: '', openai: 'https://api.openai.com/v1' };
+  document.getElementById('modelBaseUrl').placeholder = urls[this.value] || '留空使用默认地址';
+});
+
+async function saveModel() {
+  const provider = document.getElementById('modelProvider').value;
+  const apiKey = document.getElementById('modelApiKey').value;
+  const baseUrl = document.getElementById('modelBaseUrl').value;
+  if (!apiKey) { alert('请输入 API Key'); return; }
+  
+  const out = document.getElementById('modelOutput');
+  out.classList.add('show'); out.textContent = '⏳ 保存模型配置...';
+  const res = await fetch('/api/config/model', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider, apiKey, baseUrl })
+  });
+  const data = await res.json();
+  out.textContent = data.message || data.error;
+}
+
+// ===== 技能商店 =====
+async function searchSkills() {
+  const q = document.getElementById('skillSearch').value || 'popular';
+  const res = await fetch('/api/skills/search?q=' + encodeURIComponent(q));
+  const data = await res.json();
+  
+  const grid = document.getElementById('skillResults');
+  if (!data.skills || data.skills.length === 0) {
+    grid.innerHTML = '<div style="color:var(--text2);font-size:13px">未找到相关技能</div>';
+    return;
+  }
+  
+  grid.innerHTML = data.skills.slice(0, 12).map(s => `
+    <div class="skill-card">
+      <div class="name">🧩 ${s.name}</div>
+      <div class="desc">${s.desc || s.slug}</div>
+      <div class="footer">
+        <span class="tag available">${s.slug}</span>
+        <button class="btn btn-outline" style="padding:4px 12px;font-size:12px" onclick="installSkill('${s.slug}')">安装</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function installSkill(slug) {
+  const out = document.getElementById('skillSearchOutput');
+  out.classList.add('show'); out.textContent = `⏳ 正在安装 ${slug}...`;
+  
+  const res = await fetch('/api/skills/install', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug })
+  });
+  const data = await res.json();
+  out.textContent = data.success ? `✅ ${slug} 安装成功!\n${data.output}` : `❌ ${data.error}`;
+}
+
+// ===== 急诊中心 =====
+async function emergencyRestore() {
+  const btn = document.getElementById('emergencyBtn');
+  const out = document.getElementById('emergencyOutput');
+  const prog = document.getElementById('emergencyProgress');
+  btn.disabled = true; btn.innerHTML = '⏳ 抢救中...';
+  out.classList.add('show'); out.textContent = '📋 抢救过程:\n';
+  prog.querySelector('.fill').style.width = '20%';
+  
+  const res = await fetch('/api/emergency/restore', { method: 'POST' });
+  const data = await res.json();
+  
+  prog.querySelector('.fill').style.width = '100%';
+  out.textContent += `✅ 身份文件已恢复: ${data.restored.join(', ') || '无'}\n`;
+  out.textContent += `📦 备份已保存: ${data.backupSaved ? '是' : '否'}\n`;
+  out.textContent += `\n${data.message}`;
+  
+  btn.disabled = false; btn.innerHTML = '🚨 一键抢救';
+  setTimeout(() => { prog.querySelector('.fill').style.width = '0%'; }, 3000);
+}
+
+// ===== 备份医生 =====
+async function createBackup() {
+  const btn = event.target;
+  const out = document.getElementById('backupOutput');
+  const prog = document.getElementById('backupProgress');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 备份中...';
+  out.classList.add('show'); out.textContent = '⏳ 正在备份...';
+  prog.classList.add('show'); prog.querySelector('.fill').style.width = '50%';
+  
+  const res = await fetch('/api/backup/create', { method: 'POST' });
+  const data = await res.json();
+  
+  prog.querySelector('.fill').style.width = '100%';
+  if (data.success) {
+    out.textContent = `✅ 备份成功！已保存 ${data.count} 项文件\n📁 ${data.backupPath}`;
+    listBackups();
+  } else {
+    out.textContent = '❌ 备份失败';
+  }
+  btn.disabled = false; btn.innerHTML = '📦 立即备份';
+  setTimeout(() => { prog.classList.remove('show'); }, 2000);
+}
+
+async function listBackups() {
+  try {
+    const res = await fetch('/api/backup/list');
+    const data = await res.json();
+    const list = document.getElementById('backupHistory');
+    if (!data.backups || data.backups.length === 0) {
+      list.innerHTML = '<div style="color:var(--text2);font-size:13px">暂无备份</div>';
+      return;
+    }
+    list.innerHTML = data.backups.map(b => {
+      const time = new Date(b.time).toLocaleString('zh-CN');
+      const size = (b.size / 1024).toFixed(1) + ' KB';
+      return `<div class="backup-item"><span>📁 ${b.name}</span><span class="time">${time} · ${size}</span></div>`;
+    }).join('');
+    
+    // 同时也更新急诊中心的备份记录
+    const bl = document.getElementById('backupList');
+    if (bl && data.backups.length > 0) {
+      bl.innerHTML = data.backups.slice(0, 3).map(b => 
+        `📁 ${b.name} — ${new Date(b.time).toLocaleString('zh-CN')}`
+      ).join('<br>');
+    }
+  } catch(e) {}
+}
+
+// ===== 初始化 =====
+refreshStatus();
+listBackups();
+</script>
+</body>
+</html>

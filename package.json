@@ -1,0 +1,14 @@
+{
+  "name": "lobster-doctor",
+  "version": "1.0.0",
+  "description": "🦐 龙虾医生 — OpenClaw 中文伴侣工具",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "doctor": "node main.js --doctor"
+  },
+  "dependencies": {
+    "express": "^4.22.2",
+    "open": "^10.2.0"
+  }
+}
