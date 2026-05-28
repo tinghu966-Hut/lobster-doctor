@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
+const https = require('https');
 
 const app = express();
 const PORT = 18928; // 🦐 谐音
@@ -395,6 +396,353 @@ app.get('/api/logs', (req, res) => {
       .map(f => ({ name: f, time: fs.statSync(path.join(logDir, f)).mtime }));
   }
   res.json({ logs });
+});
+
+// ============================================================
+// API: 视频智能分析
+// ============================================================
+
+// Auto-detect ffmpeg path
+function findFfmpeg() {
+  var paths = ['ffmpeg', 'D:\\ffmpeg\\ffmpeg-8.1.1-full_build\\bin\\ffmpeg.exe'];
+  for (var i = 0; i < paths.length; i++) {
+    try { execSync('"' + paths[i] + '" -version', { stdio: 'pipe' }); return paths[i]; } catch(e) {}
+  }
+  try {
+    var r = execSync('where ffmpeg 2>nul', { encoding: 'utf8', shell: 'cmd.exe' });
+    var line = r.trim().split('\r\n')[0] || r.trim().split('\n')[0];
+    if (line) return line;
+  } catch(e) {}
+  return null;
+}
+var FFMPEG_PATH = findFfmpeg();
+var analysisTasks = new Map();
+
+function getDeepSeekKey() {
+  if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
+  try {
+    const authPath = path.join(os.homedir(), '.openclaw', 'auth-profiles.json');
+    if (fs.existsSync(authPath)) {
+      const auth = JSON.parse(fs.readFileSync(authPath, 'utf8'));
+      if (auth['deepseek:default']?.apiKey) return auth['deepseek:default'].apiKey;
+    }
+    const configPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+    if (fs.existsSync(configPath)) {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      const key = config.auth?.profiles?.['deepseek:default']?.apiKey;
+      if (key) return key;
+    }
+  } catch(e) {}
+  return null;
+}
+
+function getVideoInfo(videoPath) {
+  const cmd = `"${FFMPEG_PATH}" -i "${videoPath}" 2>&1`;
+  let output = '';
+  try {
+    output = execSync(cmd, { encoding: 'utf8', stdio: 'pipe', shell: 'cmd.exe' });
+  } catch(e) {
+    output = e.stdout || e.stderr || e.message || '';
+  }
+  const info = { duration: 0, width: 0, height: 0, codec: '', format: '' };
+  const durM = output.match(/Duration: (\d+):(\d+):(\d+)\.(\d+)/);
+  if (durM) {
+    info.duration = parseInt(durM[1]) * 3600 + parseInt(durM[2]) * 60 + parseInt(durM[3]) + parseInt(durM[4]) / 100;
+  }
+  const resM = output.match(/(\d+)x(\d+)[,\s]/);
+  if (resM) { info.width = parseInt(resM[1]); info.height = parseInt(resM[2]); }
+  const codecM = output.match(/Video:\s*(\w+)/);
+  if (codecM) info.codec = codecM[1];
+  const fmtM = output.match(/Input #0, (\w+)/);
+  if (fmtM) info.format = fmtM[1];
+  return info;
+}
+
+function extractFrames(videoPath, tmpDir, numFrames) {
+  const frames = [];
+  const info = getVideoInfo(videoPath);
+  const duration = info.duration;
+  if (duration <= 0) throw new Error('无法获取视频时长，文件可能已损坏');
+  const count = Math.min(numFrames, Math.max(1, Math.floor(duration / 2)));
+  const interval = duration / count;
+  for (let i = 0; i < count; i++) {
+    const time = Math.min(i * interval, duration - 0.5);
+    const frameFile = path.join(tmpDir, `frame_${i}.jpg`);
+    const cmd = `"${FFMPEG_PATH}" -ss ${time} -i "${videoPath}" -vframes 1 -q:v 3 -y "${frameFile}" 2>&1`;
+    try {
+      execSync(cmd, { stdio: 'pipe', shell: 'cmd.exe' });
+      if (fs.existsSync(frameFile) && fs.statSync(frameFile).size > 0) {
+        frames.push({ time, file: frameFile });
+      }
+    } catch(e) {}
+  }
+  if (frames.length === 0) throw new Error('无法提取视频帧，请检查视频文件是否正常');
+  return frames;
+}
+
+function getAliyunKey() {
+  if (process.env.ALIYUN_API_KEY) return process.env.ALIYUN_API_KEY;
+  if (process.env.DASHSCOPE_API_KEY) return process.env.DASHSCOPE_API_KEY;
+  try {
+    const authPath = path.join(os.homedir(), '.openclaw', 'auth-profiles.json');
+    if (fs.existsSync(authPath)) {
+      const auth = JSON.parse(fs.readFileSync(authPath, 'utf8'));
+      if (auth['aliyun:default']?.apiKey) return auth['aliyun:default'].apiKey;
+    }
+    const configPath = path.join(os.homedir(), '.openclaw', 'openclaw.json');
+    if (fs.existsSync(configPath)) {
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      const key = config.auth?.profiles?.['aliyun:default']?.apiKey;
+      if (key) return key;
+    }
+  } catch(e) {}
+  return null;
+}
+
+function callAliyun(messages) {
+  return new Promise((resolve, reject) => {
+    const apiKey = getAliyunKey();
+    if (!apiKey) return reject(new Error('未配置阿里云 API Key，请先在"模型管家"中配置'));
+    const body = JSON.stringify({
+      model: 'qwen-vl-max',
+      messages,
+      max_tokens: 4096,
+      temperature: 0.7
+    });
+    const options = {
+      hostname: 'dashscope.aliyuncs.com',
+      path: '/compatible-mode/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) return reject(new Error(parsed.error.message));
+          const text = parsed.choices?.[0]?.message?.content || '';
+          resolve(text);
+        } catch(e) {
+          reject(new Error('API响应解析失败: ' + e.message));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+function callDeepSeek(messages) {
+  return new Promise((resolve, reject) => {
+    const apiKey = getDeepSeekKey();
+    if (!apiKey) return reject(new Error('未配置 DeepSeek API Key，请先在"模型管家"中配置'));
+    const body = JSON.stringify({
+      model: 'deepseek-chat',
+      messages,
+      max_tokens: 4096,
+      temperature: 0.7
+    });
+    const options = {
+      hostname: 'api.deepseek.com',
+      path: '/chat/completions',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) return reject(new Error(parsed.error.message));
+          const text = parsed.choices?.[0]?.message?.content || '';
+          resolve(text);
+        } catch(e) {
+          reject(new Error('API响应解析失败: ' + e.message));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+async function processVideoTask(taskId) {
+  const task = analysisTasks.get(taskId);
+  if (!task) return;
+  try {
+    task.status = 'processing';
+
+    task.progress = 10;
+    task.message = '正在分析视频信息...';
+    const info = getVideoInfo(task.videoFile);
+
+    task.progress = 25;
+    task.message = '正在提取视频关键帧...';
+    const frames = extractFrames(task.videoFile, task.tmpDir, 8);
+
+    task.progress = 40;
+    task.message = '正在准备分析数据...';
+    const frameData = frames.map(f => ({
+      time: f.time,
+      data: fs.readFileSync(f.file).toString('base64')
+    }));
+
+    task.progress = 55;
+    task.message = 'AI 正在分析视频内容，请稍候...';
+
+    const content = [
+      {
+        type: 'text',
+        text: `You are a video content analyzer. Analyze this video based on its key frames.
+
+Video Info:
+- Duration: ${info.duration.toFixed(1)}s
+- Resolution: ${info.width}x${info.height}
+- Codec: ${info.codec}
+- Format: ${info.format}
+
+Key frames at timestamps: ${frames.map(f => f.time.toFixed(1) + 's').join(', ')}
+
+Please provide in Chinese (中文):
+1. **视频摘要** (2-3 sentences describing the video)
+2. **关键场景** (list each scene with timestamp and description)
+3. **内容分类** (tutorial, presentation, interview, entertainment, etc.)`
+      },
+      ...frameData.map(f => ({
+        type: 'image_url',
+        image_url: { url: `data:image/jpeg;base64,${f.data}` }
+      }))
+    ];
+
+    const model = task.model || 'aliyun';
+    const caller = model === 'aliyun' ? callAliyun : callDeepSeek;
+    const analysis = await caller([{ role: 'user', content }]);
+
+    task.progress = 90;
+    task.message = '正在整理分析结果...';
+
+    const segments = frames.map(f => {
+      const m = Math.floor(f.time / 60);
+      const s = Math.floor(f.time % 60);
+      return { timestamp: `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`, timeSeconds: f.time };
+    });
+
+    task.progress = 100;
+    task.message = '分析完成';
+    task.status = 'done';
+    task.result = {
+      videoInfo: info,
+      segments,
+      analysis
+    };
+
+    setTimeout(() => {
+      try { if (fs.existsSync(task.tmpDir)) fs.rmSync(task.tmpDir, { recursive: true, force: true }); } catch(e) {}
+    }, 120000);
+
+  } catch(e) {
+    task.status = 'error';
+    task.error = e.message;
+    task.progress = 100;
+    task.message = '分析失败';
+  }
+}
+
+app.post('/api/video/analyze', (req, res) => {
+  const { videoPath, videoData, fileName } = req.body;
+
+  if (!videoPath && !videoData) {
+    return res.json({ success: false, error: '请提供视频文件路径(videoPath)或视频数据(videoData)' });
+  }
+
+  const taskId = (crypto.randomUUID ? crypto.randomUUID().slice(0, 8) :
+    Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const tmpDir = path.join(os.tmpdir(), 'lobster-video', taskId);
+  fs.mkdirSync(tmpDir, { recursive: true });
+
+  let videoFile;
+  if (videoPath) {
+    if (!fs.existsSync(videoPath)) {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+      return res.json({ success: false, error: '视频文件不存在: ' + videoPath });
+    }
+    videoFile = videoPath;
+  } else {
+    const ext = fileName ? path.extname(fileName) : '.mp4';
+    videoFile = path.join(tmpDir, 'input' + ext);
+    fs.writeFileSync(videoFile, Buffer.from(videoData, 'base64'));
+  }
+
+  analysisTasks.set(taskId, {
+    status: 'queued', progress: 0, message: '排队中...',
+    tmpDir, videoFile, result: null, error: null,
+    model: req.body.model || 'aliyun'
+  });
+
+  processVideoTask(taskId);
+
+  res.json({ success: true, taskId });
+});
+
+app.get('/api/video/analyze/status/:taskId', (req, res) => {
+  const task = analysisTasks.get(req.params.taskId);
+  if (!task) return res.json({ success: false, error: '任务不存在或已过期' });
+
+  if (task.status === 'done') {
+    res.json({ success: true, status: 'done', progress: 100, message: '分析完成', result: task.result });
+  } else if (task.status === 'error') {
+    res.json({ success: false, status: 'error', progress: 100, message: task.error, error: task.error });
+  } else {
+    res.json({ success: true, status: task.status, progress: task.progress, message: task.message });
+  }
+});
+
+// ============================================================
+// API: 视觉模型分析（支持模型路由）
+// ============================================================
+app.post('/api/vision/analyze', async (req, res) => {
+  const { model, image, prompt, images } = req.body;
+  if (!image && (!images || images.length === 0)) {
+    return res.json({ success: false, error: '请提供图片数据(image 或 images)' });
+  }
+
+  const content = [
+    { type: 'text', text: prompt || '请详细描述这张图片的内容，包括物体、场景、颜色、文字等' }
+  ];
+
+  if (image) {
+    content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${image}` } });
+  }
+  if (images) {
+    images.forEach(img => {
+      content.push({ type: 'image_url', image_url: { url: `data:image/jpeg;base64,${img}` } });
+    });
+  }
+
+  try {
+    let analysis;
+    if (model === 'deepseek') {
+      analysis = await callDeepSeek([{ role: 'user', content }]);
+    } else {
+      analysis = await callAliyun([{ role: 'user', content }]);
+    }
+    res.json({ success: true, analysis });
+  } catch(e) {
+    res.json({ success: false, error: e.message });
+  }
 });
 
 // ============================================================

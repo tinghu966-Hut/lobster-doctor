@@ -1,0 +1,6 @@
+Lobster Doctor - 龙虾医生
+Version: 1.0.0
+Build: standalone-exe
+Platform: win32-x64
+Node.js Target: 18
+Updated: 2026-05-28

@@ -295,6 +295,9 @@
   <div class="tab" onclick="switchTab(this, 'skills')">
     <span>🧩</span> 技能商店 <span class="badge">NEW</span>
   </div>
+  <div class="tab" onclick="switchTab(this, 'video')">
+    <span>🎥</span> 视频分析 <span class="badge">NEW</span>
+  </div>
   <div class="tab" onclick="switchTab(this, 'emergency')">
     <span>🚑</span> 急诊中心
   </div>
@@ -332,7 +335,7 @@
     <p style="font-size:13px;line-height:1.8;color:var(--text2)">
       龙虾医生是为中国 OpenClaw 用户打造的一站式伴侣工具。<br>
       解决新手安装难、配置复杂、崩溃不知咋办等痛点。<br><br>
-      <b>六大模块：</b>智能安装 · 飞书助手 · 模型管家 · 技能商店 · 急诊中心 · 备份医生
+      <b>七大模块：</b>智能安装 · 飞书助手 · 模型管家 · 技能商店 · 视频分析 · 急诊中心 · 备份医生
     </p>
   </div>
 </div>
@@ -555,6 +558,70 @@
   </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- PANEL: 视频分析 -->
+<!-- ============================================================ -->
+<div class="panel" id="panel-video">
+  <div class="panel-title">🎥 视频智能分析</div>
+  <div class="panel-desc">上传视频或输入文件路径，AI 自动分析视频内容、提取关键场景、生成摘要。</div>
+
+  <div class="card">
+    <div class="card-title">📤 选择视频文件</div>
+    <div id="videoDropZone" style="border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:12px" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" onclick="document.getElementById('videoFileInput').click()">
+      <div style="font-size:48px;margin-bottom:10px">🎬</div>
+      <div style="font-size:16px;font-weight:600;color:var(--text2)">拖拽视频文件到此处</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px">或点击选择文件</div>
+      <input type="file" id="videoFileInput" accept=".mp4,.avi,.mov,.mkv,.webm" style="display:none" onchange="handleFileSelect(event)">
+    </div>
+    <div class="form-group">
+      <label>或输入视频文件路径（支持大文件）</label>
+      <input type="text" id="videoFilePath" placeholder="D:\videos\example.mp4">
+    </div>
+    <div id="videoFileInfo" style="font-size:13px;color:var(--text2);margin-bottom:12px;display:none"></div>
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="form-group">
+        <label>视觉模型</label>
+        <select id="visionModel">
+          <option value="aliyun">阿里通义千问 (Qwen)</option>
+          <option value="deepseek">DeepSeek</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" onclick="startVideoAnalysis()" id="videoAnalyzeBtn">
+      🚀 开始分析
+    </button>
+  </div>
+
+  <div id="videoProgress" style="display:none">
+    <div class="card">
+      <div class="card-title">⏳ 分析进度</div>
+      <div class="progress-bar show" id="videoProgressBar"><div class="fill" style="width:0%"></div></div>
+      <div id="videoProgressMessage" style="font-size:13px;color:var(--text2);text-align:center;margin-top:8px">初始化...</div>
+    </div>
+  </div>
+
+  <div id="videoResult" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 视频信息</div>
+      <div id="videoInfo" style="font-size:13px;color:var(--text2);display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 AI 分析报告</div>
+      <div id="videoAnalysis" style="font-size:14px;line-height:1.8;color:var(--text);white-space:pre-wrap"></div>
+    </div>
+
+    <div class="card" id="videoSegmentsCard" style="display:none">
+      <div class="card-title">🎯 关键场景</div>
+      <div id="videoSegments" style="display:grid;gap:8px"></div>
+    </div>
+
+    <button class="btn btn-outline" onclick="resetVideoAnalysis()">🔄 分析新视频</button>
+  </div>
+
+  <div id="videoError" class="output" style="display:none;color:var(--red)"></div>
+</div>
+
 <!-- ===== JavaScript ===== -->
 <script>
 // ===== Tab switching =====
@@ -562,7 +629,7 @@ function switchTab(el, name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   if (el) el.classList.add('active');
-  else document.querySelector(`.tab:nth-child(${['home','install','feishu','model','skills','emergency','backup'].indexOf(name)+1})`)?.classList.add('active');
+  else document.querySelector(`.tab:nth-child(${['home','install','feishu','model','skills','video','emergency','backup'].indexOf(name)+1})`)?.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
 }
 
@@ -783,6 +850,220 @@ async function listBackups() {
       ).join('<br>');
     }
   } catch(e) {}
+}
+
+// ===== 视频分析 =====
+let selectedVideoFile = null;
+let videoTaskId = null;
+let videoPollTimer = null;
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('videoDropZone').style.borderColor = 'var(--accent)';
+  document.getElementById('videoDropZone').style.background = 'rgba(255,123,43,0.05)';
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
+  document.getElementById('videoDropZone').style.background = 'transparent';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('videoDropZone').style.borderColor = 'var(--border)';
+  document.getElementById('videoDropZone').style.background = 'transparent';
+  const files = e.dataTransfer.files;
+  if (files.length > 0) setVideoFile(files[0]);
+}
+
+function handleFileSelect(e) {
+  if (e.target.files.length > 0) setVideoFile(e.target.files[0]);
+}
+
+function setVideoFile(file) {
+  const validTypes = ['.mp4', '.avi', '.mov', '.mkv', '.webm'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!validTypes.includes(ext)) {
+    alert('不支持的文件格式，请使用: ' + validTypes.join(', '));
+    return;
+  }
+  selectedVideoFile = file;
+  const size = (file.size / (1024 * 1024)).toFixed(1);
+  document.getElementById('videoFileInfo').style.display = 'block';
+  document.getElementById('videoFileInfo').innerHTML = `✅ 已选择: <b>${file.name}</b> (${size} MB)`;
+  document.getElementById('videoDropZone').querySelector('div:first-child').textContent = '📁';
+  document.getElementById('videoFilePath').value = '';
+}
+
+async function startVideoAnalysis() {
+  const btn = document.getElementById('videoAnalyzeBtn');
+  const filePath = document.getElementById('videoFilePath').value.trim();
+  const progressDiv = document.getElementById('videoProgress');
+  const resultDiv = document.getElementById('videoResult');
+  const errorDiv = document.getElementById('videoError');
+  const progressBar = document.getElementById('videoProgressBar').querySelector('.fill');
+  const progressMsg = document.getElementById('videoProgressMessage');
+
+  errorDiv.style.display = 'none';
+  resultDiv.style.display = 'none';
+
+  const visionModel = document.getElementById('visionModel').value;
+
+  if (!selectedVideoFile && !filePath) {
+    alert('请先选择视频文件或输入文件路径');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 分析中...';
+  progressDiv.style.display = 'block';
+  progressBar.style.width = '5%';
+  progressMsg.textContent = '正在提交任务...';
+
+  try {
+    let body;
+    if (filePath) {
+      body = JSON.stringify({ videoPath: filePath, model: visionModel });
+    } else {
+      const reader = new FileReader();
+      const base64 = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedVideoFile);
+      });
+      body = JSON.stringify({ videoData: base64, fileName: selectedVideoFile.name, model: visionModel });
+    }
+
+    progressMsg.textContent = '正在提交任务...';
+    progressBar.style.width = '10%';
+
+    const res = await fetch('/api/video/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      showVideoError(data.error || '提交任务失败');
+      return;
+    }
+
+    videoTaskId = data.taskId;
+    startVideoPolling(data.taskId);
+  } catch(e) {
+    showVideoError('连接失败: ' + e.message);
+  }
+}
+
+function startVideoPolling(taskId) {
+  const progressBar = document.getElementById('videoProgressBar').querySelector('.fill');
+  const progressMsg = document.getElementById('videoProgressMessage');
+  let stuckCount = 0;
+
+  videoPollTimer = setInterval(async () => {
+    try {
+      const res = await fetch('/api/video/analyze/status/' + taskId);
+      const data = await res.json();
+
+      if (data.success && data.status === 'done' && data.result) {
+        clearInterval(videoPollTimer);
+        videoPollTimer = null;
+        displayVideoResult(data.result);
+        return;
+      }
+
+      if (!data.success && data.status === 'error') {
+        clearInterval(videoPollTimer);
+        videoPollTimer = null;
+        showVideoError(data.error || '分析失败');
+        return;
+      }
+
+      if (data.success) {
+        progressBar.style.width = (data.progress || 0) + '%';
+        progressMsg.textContent = data.message || '处理中...';
+        stuckCount = 0;
+      }
+    } catch(e) {
+      stuckCount++;
+      if (stuckCount > 30) {
+        clearInterval(videoPollTimer);
+        videoPollTimer = null;
+        showVideoError('连接超时，请重试');
+      }
+    }
+  }, 1000);
+}
+
+function displayVideoResult(result) {
+  const btn = document.getElementById('videoAnalyzeBtn');
+  btn.disabled = false;
+  btn.innerHTML = '🚀 开始分析';
+
+  document.getElementById('videoProgress').style.display = 'none';
+  document.getElementById('videoResult').style.display = 'block';
+  document.getElementById('videoError').style.display = 'none';
+
+  const info = result.videoInfo || {};
+  const infoDiv = document.getElementById('videoInfo');
+  infoDiv.innerHTML = `
+    <div>⏱ 时长: <b>${info.duration ? info.duration.toFixed(1) + 's' : '-'}</b></div>
+    <div>📐 分辨率: <b>${info.width}x${info.height}</b></div>
+    <div>🎞 编码: <b>${info.codec || '-'}</b></div>
+    <div>📦 格式: <b>${info.format || '-'}</b></div>
+  `;
+
+  const analysisDiv = document.getElementById('videoAnalysis');
+  if (result.analysis) {
+    analysisDiv.textContent = result.analysis;
+  } else {
+    analysisDiv.textContent = 'AI 分析结果为空';
+  }
+
+  if (result.segments && result.segments.length > 0) {
+    const segmentsCard = document.getElementById('videoSegmentsCard');
+    const segmentsDiv = document.getElementById('videoSegments');
+    segmentsCard.style.display = 'block';
+    segmentsDiv.innerHTML = result.segments.map((seg, i) => `
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px">
+        <span style="background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${i + 1}</span>
+        <span style="font-weight:600;color:var(--accent2);font-family:monospace">${seg.timestamp}</span>
+        <span style="color:var(--text2)">关键场景 ${i + 1}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function showVideoError(msg) {
+  const btn = document.getElementById('videoAnalyzeBtn');
+  btn.disabled = false;
+  btn.innerHTML = '🚀 开始分析';
+
+  document.getElementById('videoProgress').style.display = 'none';
+  document.getElementById('videoResult').style.display = 'none';
+
+  const errorDiv = document.getElementById('videoError');
+  errorDiv.style.display = 'block';
+  errorDiv.textContent = '❌ ' + msg;
+}
+
+function resetVideoAnalysis() {
+  selectedVideoFile = null;
+  videoTaskId = null;
+  if (videoPollTimer) { clearInterval(videoPollTimer); videoPollTimer = null; }
+
+  document.getElementById('videoResult').style.display = 'none';
+  document.getElementById('videoError').style.display = 'none';
+  document.getElementById('videoProgress').style.display = 'none';
+  document.getElementById('videoFileInfo').style.display = 'none';
+  document.getElementById('videoFilePath').value = '';
+  document.getElementById('videoDropZone').querySelector('div:first-child').textContent = '🎬';
+  document.getElementById('videoFileInput').value = '';
 }
 
 // ===== 初始化 =====
